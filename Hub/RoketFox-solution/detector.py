@@ -5,33 +5,43 @@ import math
 
 
 def find_color(color):
-    colors = {0: (255, 255, 255),  # white
-              1: (40, 40, 40),  # black
-              2: (95, 95, 230),  # red
-              3: (80, 160, 250),  # orange
-              4: (70, 240, 235),  # yellow
-              5: (120, 200, 0),  # green
-              6: (255, 205, 0),  # cyan
-              7: (210, 120, 10),  # blue
-              8: (225, 150, 90),  # violet
-              9: (205, 145, 215)}  # magenta
+                        # 0 white
+                        # 1 black
+    colors = {2: 15,    # 2 red
+              3: 22,    # 3 orange
+              4: 33,    # 4 yellow
+              5: 78,    # 5 green
+              6: 96,    # 6 cyan
+              7: 130,   # 7 blue
+              8: 144}   # 8 violet
+              #9: 170}   # 9 magenta
     
-    cur_col, min_dist = None, np.inf
-    for num, col in colors.items():
-        dist = np.linalg.norm(np.array(col) - np.array(color))
-        if dist < min_dist:
-            min_dist = dist
-            cur_col = num
-    return cur_col
-
+    h, s, v = color[0], color[1], color[2]
+    if v < (255*0.5): # most likely black
+        return 1
+    elif s < (255*0.2) and v > (255*0.8): # most likely white
+        return 0
+    elif s < (255*0.35): # most likely fricking magenta
+        return 9
+    else:
+        for key, hue in colors.items():
+            if h < hue:
+                return key
+    return 2
+    
 def detect_colors(img) -> list:
-    colors = []
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    
+    out_colors = []
     for x in range(2):
         for y in range(2):
-            sector = img[x*100+40:x*100+50, y*100+40:y*100+50]
+            sector = hsv[x*100+40:x*100+50, y*100+40:y*100+50]
             color = np.mean(sector, axis=(0, 1))
-            colors.append(find_color(color))
-    return colors
+            out_colors.append(find_color(color))
+    out_colors = [[out_colors[0], out_colors[2]], [out_colors[1], out_colors[3]]]
+    while not((out_colors[0][0] + out_colors[0][1] == 11 or out_colors[0][0] + out_colors[1][0] == 11) and out_colors[0][0] + out_colors[1][1] != 11):
+         out_colors = list(map(list, zip(*out_colors[::-1])))
+    return out_colors
 
 def face_center(x, y, w, h):
     return np.array((int(x + w/2), int(y + h/2)))
@@ -68,6 +78,7 @@ def detect_face(img: np.ndarray):
         pts2 = np.float32([[0, 0], [width, 0], [width, height], [0, height]])
         matrix = cv2.getPerspectiveTransform(box, pts2)
         out = cv2.warpPerspective(img, matrix, (width, height))
+        
         print(detect_colors(out))
         cv2.imshow(f"{cnt_id}", out)
     
