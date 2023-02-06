@@ -130,3 +130,6 @@ dmypy.json
 
 # IDE files
 .vscode/
+
+# Custom modules
+beholder2048squad/
