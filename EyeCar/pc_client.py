@@ -1,72 +1,55 @@
+from functools import partial
+from typing import Optional
+
 import cv2
+import Car
 
-from beholder2048squad.Server import Server
+from beholder2048squad.Server import Server, ConnType
 from LaneKeeper import LaneKeeper, LaneStatus
-from Detection import *
+from Model import Model, Detection, DetectionResults
+from Detection import TrafficLight, Pedestrian, match_condition
 
-from dataclasses import dataclass
-
-MAX_ANGLE: float = 45
-MAX_SPEED: int = 255
-MAX_DEVIATION: float = 5
-
-k_dev = MAX_ANGLE / MAX_DEVIATION
-k_break = .5
+def Command(*, speed: Optional[int]=None, angle: Optional[int]=None) -> str:
+    return \
+        f'SPEED:{speed}\n' if speed is not None else '' + \
+        f'ANGLE:{angle}\n' if angle is not None else ''
 
 
-@dataclass
-class Command:
-    speed: int
-    angle: int
-
-    def __str__(self):
-        return f'SPEED:{self.speed}\nANGLE:{self.angle}'
-
+StopCmd = partial(Command, speed=0)
 
 serv = Server(9090)
+model = Model()
 lane_keeper = LaneKeeper()
 
-
-def get_command(frame: cv2.Mat, curr_speed: int, curr_angle: int) -> Command:
-    cmd = Command(curr_speed, curr_angle)
-
-    det: tuple = model.forward(frame)
+def get_command(frame: cv2.Mat, ) -> str:
+    det: Detection = model.forward(frame)
+    lane: LaneStatus = lane_keeper.forward(frame)
 
     traffic_lights = (TrafficLight(detection)
-                      for detection in det.traffic_light)
-
-    pedestrians = (Pedestrian(detection)
-                   for detection in det.pedestrians)
+                      for detection in det.TrafficLights)
+    pedestrians = (Pedestrian(detection) for detection in det.Pedestrians)
 
     # TODO confidence buffer
     if match_condition(traffic_lights, TrafficLight.stop_condition) or \
-            match_condition(pedestrians, Pedestrian.stop_condition):
-        return Command(speed=0, angle=curr_angle)
+            match_condition(pedestrians, Pedestrian.stop_condition) or \
+            lane.distance_travelled > Car.TARGET_DISTANCE:
+        return StopCmd()
 
-    lane_status = LaneKeeper.forward(frame)
+    Car.direct(lane.deviation)
 
-    angle = int(lane_status.deviation * k_dev)
-    speed = int(MAX_SPEED - angle * k_break)
-
-    # TODO PID smoothing
-    return Command(speed=speed, angle=angle)
-
-
-speed, angle = 0, 0
+    return Command(speed=Car.speed, angle=Car.angle)
 
 
 def main_loop() -> None:
-    frame = serv.recv_img()
+    frame = serv.chat_img()
 
-    if cv2.waitKey(1) == ord('q'):
+    if cv2.waitKey(1) == ord('q') or frame is None:
         raise StopIteration
 
     cv2.imshow('frame', frame)
 
-    cmd = get_command(frame, speed, angle)
-
-    speed, angle = cmd.speed, cmd.angle
-    serv.send_str(str(cmd))
+    cmd = get_command(frame)
+    serv.chat_cmd(cmd, ConnType.C)
 
 
 if __name__ == '__main__':
@@ -78,4 +61,5 @@ if __name__ == '__main__':
         print('Exiting main loop...')
     finally:
         print('Dont get hit by a car')
-        serv.send_str(str(Command(speed=0, angle=0)))
+        serv.chat_cmd(StopCmd())
+        serv.close()

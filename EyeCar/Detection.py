@@ -1,14 +1,9 @@
 import cv2
 from enum import Enum
 
-from abc import ABC, abstractmethod, abstractproperty
-from collections import namedtuple
+from abc import ABC
 from typing import Iterable
-from itertools import chain
-
-
-DetectionResults = namedtuple("Detection results", "label1 label2 label3 ...")
-Detection = namedtuple("Detection", "conf bbox")
+from Model import Model, Detection
 
 
 class DetectedObject(ABC):
@@ -20,15 +15,18 @@ class DetectedObject(ABC):
 
 
 class TrafficLight(DetectedObject):
-    Signal = Enum(
-        value='Signal',
-        names=('stop', 'go'))
-
+    class Signal(Enum):
+        R = 0
+        Y = 1
+        G = 2
+        RY = 3
+    
     signal: Signal
 
     @property
     def stop_condition(self) -> bool:
-        return self.conf > 0.8 and self.distance < 3.0 and self.signal == TrafficLight.Signal.STOP
+        return self.conf > 0.8 and self.distance < 3.0 and self.signal in \
+                (TrafficLight.Signal.R, TrafficLight.Signal.Y, TrafficLight.Signal.RY)
 
     def __init__(self, model) -> None:
         ...
@@ -42,6 +40,10 @@ class Pedestrian(DetectedObject):
     def stop_condition(self) -> bool:
         ...
 
+class Sign(DetectedObject):
+    def __init__(self, detection: DetectedObject):
+        ...
+
 
 def match_condition(detections: Iterable, cond_checker: property) -> bool:
     return any((cond_checker.fget(detection) for detection in detections))
@@ -49,7 +51,7 @@ def match_condition(detections: Iterable, cond_checker: property) -> bool:
 
 if __name__ == "__main__":
 
-    model = ...
+    model = Model()
     cap = cv2.VideoCapture(0)
 
     while True:
@@ -58,13 +60,13 @@ if __name__ == "__main__":
         if not ret:
             continue
 
-        det: tuple = model.forward(frame)
+        det = model.forward(frame)
 
         traffic_lights = (TrafficLight(detection)
-                          for detection in det.traffic_light)
+                          for detection in det.TrafficLights)
 
         pedestrians = (Pedestrian(detection)
-                       for detection in det.pedestrians)
+                       for detection in det.Pedestrians)
 
         if match_condition(traffic_lights, TrafficLight.stop_condition) or \
            match_condition(pedestrians, Pedestrian.stop_condition) or ...:
