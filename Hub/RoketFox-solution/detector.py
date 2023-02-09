@@ -44,13 +44,28 @@ def detect_colors(img) -> list:
     return out_colors
 
 def face_center(x, y, w, h):
-    return np.array((int(x + w/2), int(y + h/2)))
+    return np.array((x + w//2, y + h//2))
 
 def detect_face(img: np.ndarray):
+    # img = img[110:390, 175:430]
+    
+    perspective = np.float32([[172, 104],
+                              [409, 104],
+                              [428, 390],
+                              [159, 390]])
+    width  = 268
+    height = 316
+    unit_size = (4, 4)
+    pts = np.float32([[0, 0], [width, 0], [width, height], [0, height]])
+    matrix = cv2.getPerspectiveTransform(perspective, pts)
+    croped_img = cv2.warpPerspective(img, matrix, (width, height))
+    
+    
     gaus_ksize = 7
     treshold1, treshold2 = 200, 100
     
-    grsc = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    
+    grsc = cv2.cvtColor(croped_img, cv2.COLOR_BGR2GRAY)
     gaus = cv2.GaussianBlur(grsc, (gaus_ksize, gaus_ksize), 0)
     edges = cv2.Canny(gaus, treshold1, treshold2)
     edges = cv2.dilate(edges, None, iterations=0)
@@ -75,14 +90,20 @@ def detect_face(img: np.ndarray):
         rect = cv2.minAreaRect(cnts[cnt_id])
         box = cv2.boxPoints(rect)
         box = np.float32(box)
-        pts2 = np.float32([[0, 0], [width, 0], [width, height], [0, height]])
-        matrix = cv2.getPerspectiveTransform(box, pts2)
-        out = cv2.warpPerspective(img, matrix, (width, height))
+        box1 = np.int0(box)
+        #cv2.drawContours(croped_img, [box1], 0, (0,0,255), 2)
+        pts = np.float32([[0, 0], [width, 0], [width, height], [0, height]])
+        matrix = cv2.getPerspectiveTransform(box, pts)
+        out = cv2.warpPerspective(croped_img, matrix, (width, height))
+        
+        out_coords = face_center(*cv2.boundingRect(cnts[cnt_id]))
         
         print(detect_colors(out))
+        print(f"{out_coords[0]/croped_img.shape[0]:.2f}, {out_coords[1]/croped_img.shape[1]:.2f}")
+        print(f"{out_coords[0]:.2f}, {out_coords[1]:.2f}")
         cv2.imshow(f"{cnt_id}", out)
     
-    cv2.imshow("img", img)
+    cv2.imshow("img", croped_img)
     cv2.imshow("edges", edges)
     
 
@@ -91,7 +112,7 @@ def clamp(n: int, minn: int, maxn: int) -> int:
 
 
 if __name__ == "__main__":
-    imgs = list(cv2.imread(r"res/"+i)[110:390, 175:430] for i in os.listdir(r"res") if i.endswith(".png")) # list of cropped imgs
+    imgs = list(cv2.imread(r"res/"+i) for i in os.listdir(r"res") if i.endswith(".png")) # list of cropped imgs
     currImgId = 0
     
     
