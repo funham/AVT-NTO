@@ -20,28 +20,30 @@ class TrafficLight(DetectedObject):
         Y = 1
         G = 2
         RY = 3
-    
+
     signal: Signal
 
     @property
     def stop_condition(self) -> bool:
         return self.conf > 0.8 and self.distance < 3.0 and self.signal in \
-                (TrafficLight.Signal.R, TrafficLight.Signal.Y, TrafficLight.Signal.RY)
-
-    def __init__(self, model) -> None:
-        ...
+            (TrafficLight.Signal.R, TrafficLight.Signal.Y, TrafficLight.Signal.RY)
 
 
 class Pedestrian(DetectedObject):
-    def __init__(self, detection: DetectedObject):
+    def __init__(self, detection: Detection):
         ...
 
     @property
     def stop_condition(self) -> bool:
         ...
 
+
 class Sign(DetectedObject):
-    def __init__(self, detection: DetectedObject):
+    def __init__(self, detection: Detection):
+        ...
+
+    @property
+    def stop_condition(self) -> bool:
         ...
 
 
