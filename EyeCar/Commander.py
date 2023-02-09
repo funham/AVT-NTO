@@ -55,13 +55,13 @@ def calculate_command(frame: cv2.Mat) -> str:
             lane.crossroad_distance < Car.CROSSROAD_STOP_DIST:
         return Command.STOP
 
-    new_params = Car.calc_params(lane.deviation)
+    speed, angle = Car.calc_params(lane.deviation)
 
-    return Command.str(*new_params)
+    return Command.str(speed, angle)
 
 
 class Command:
-    STOP = 'SPEED:0\n'
+    STOP: str = 'SPEED:0\n'
 
     @staticmethod
     def str(speed, angle) -> str:
