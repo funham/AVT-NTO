@@ -3,6 +3,7 @@ from typing import *
 
 import cv2
 import Car
+import cfg
 
 from LaneKeeper import LaneKeeper, Lane
 from Model import Model, Detection, DetectionResults
@@ -13,8 +14,7 @@ from collections import deque
 model = Model()
 lane_keeper = LaneKeeper()
 
-stop_conf = 0
-cmd_buff = deque([], maxlen=CMD_BUFF_LEN)
+cmd_buff = deque([], maxlen=cfg.CMD_BUFF_LEN)
 
 
 def confidence_buffer(func: Callable) -> Callable:
@@ -23,13 +23,13 @@ def confidence_buffer(func: Callable) -> Callable:
     def inner(frame: cv2.Mat):
         cmd = func(frame)
 
-        if CMD_BUFF_LEN == 0:
+        if cfg.CMD_BUFF_LEN == 0:
             return cmd
 
         cmd_buff.append(cmd)
 
         stop_conf = sum(
-            filter(lambda x: x == Command.STOP, cmd_buff)) / CMD_BUFF_LEN
+            filter(lambda x: x == Command.STOP, cmd_buff)) / cfg.CMD_BUFF_LEN
 
         if stop_conf > 0.8:
             return Command.STOP
