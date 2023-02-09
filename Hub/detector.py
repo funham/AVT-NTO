@@ -102,6 +102,7 @@ def detect_face(img: np.ndarray):
         print(f"{out_coords[0]/croped_img.shape[0]:.2f}, {out_coords[1]/croped_img.shape[1]:.2f}")
         print(f"{out_coords[0]:.2f}, {out_coords[1]:.2f}")
         cv2.imshow(f"{cnt_id}", out)
+        print(type(out))
     
     cv2.imshow("img", croped_img)
     cv2.imshow("edges", edges)
@@ -112,7 +113,8 @@ def clamp(n: int, minn: int, maxn: int) -> int:
 
 
 if __name__ == "__main__":
-    imgs = list(cv2.imread(r"res/"+i) for i in os.listdir(r"res") if i.endswith(".png")) # list of cropped imgs
+    imgs_folder = "res"
+    imgs = list(cv2.imread(f"{imgs_folder}/{i}") for i in os.listdir(r"res") if i.endswith(".png")) # list of cropped imgs
     currImgId = 0
     
     
