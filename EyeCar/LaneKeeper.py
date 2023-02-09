@@ -38,6 +38,7 @@ class LaneKeeper:
         return rdev - ldev
 
     def _get_layout(self, img: cv2.Mat) -> cv2.Mat:
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         layout = cv2.inRange(img, (...), (...))  # binarized image
         dts = np.array([...])
         M = cv2.getPerspectiveTransform(dts, ...)
