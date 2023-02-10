@@ -1,4 +1,3 @@
-from functools import partial
 from typing import *
 
 import cv2
@@ -56,7 +55,6 @@ def calculate_command(frame: cv2.Mat) -> str:
         return Command.STOP
 
     speed, angle = Car.calc_params(lane.deviation)
-
     return Command.str(speed, angle)
 
 
@@ -64,7 +62,7 @@ class Command:
     STOP: str = 'SPEED:0\n'
 
     @staticmethod
-    def str(speed, angle) -> str:
+    def str(speed=None, angle=None) -> str:
         return \
-            f'SPEED:{speed}\n' if speed is not None else '' + \
-            f'ANGLE:{angle}\n' if angle is not None else ''
+            (f'SPEED:{speed}\n' if speed is not None else '') + \
+            (f'ANGLE:{angle}\n' if angle is not None else '')

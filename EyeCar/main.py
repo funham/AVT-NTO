@@ -18,6 +18,7 @@ def main_loop() -> None:
     cmd = Commander.calculate_command(frame)
     serv.chat_cmd(cmd)
 
+    print("cmd:")
     print(cmd)
 
 
@@ -28,6 +29,7 @@ if __name__ == '__main__':
 
     except StopIteration:
         print('Exiting main loop...')
+
     finally:
         print('Dont get hit by a car')
         serv.chat_cmd(Commander.Command.STOP)
