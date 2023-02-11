@@ -13,7 +13,7 @@ pid = PID(1, 0.1, 0.05, setpoint=0)
 def calc_params(deviation: float) -> Tuple[int, int]:
     global angle, speed
 
-    angle = int(pid(deviation * k_dev))
+    angle = int(deviation * k_dev)
     speed = int(cfg.MAX_SPEED - angle * k_break)
 
     return angle, speed
