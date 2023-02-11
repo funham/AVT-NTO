@@ -22,6 +22,7 @@ cap = get_cap()
 
 def main_loop() -> None:
     ret, frame = cap.read()
+    frame = cv2.resize(frame, (300, 200))
 
     if INPUT_MODE == InputMode.CAM:
         if cv2.waitKey(1) & 0xFF == ord('q'):
