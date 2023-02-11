@@ -5,15 +5,20 @@ from simple_pid import PID
 k_dev = cfg.MAX_ANGLE / cfg.MAX_DEVIATION
 k_break = .5
 
-angle, speed = 0, 0
+speed, angle = 0, 0
 
 pid = PID(1, 0.1, 0.05, setpoint=0)
 
+def constrain(x, min_x, max_x):
+    return max(min(x, max_x), min_x)
 
 def calc_params(deviation: float) -> Tuple[int, int]:
-    global angle, speed
-
+    global speed, angle
+    
     angle = int(deviation * k_dev)
-    speed = int(cfg.MAX_SPEED - angle * k_break)
+    speed = int(cfg.MAX_SPEED - abs(angle) * k_break)
 
-    return angle, speed
+    speed = constrain(speed, cfg.MIN_SPEED, cfg.MAX_SPEED)
+    angle = constrain(angle, -cfg.MAX_ANGLE, cfg.MAX_ANGLE)
+
+    return speed, angle

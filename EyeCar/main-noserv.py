@@ -22,7 +22,6 @@ cap = get_cap()
 
 def main_loop() -> None:
     ret, frame = cap.read()
-    print(ret, type(frame))
 
     if INPUT_MODE == InputMode.CAM:
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -32,7 +31,7 @@ def main_loop() -> None:
         raise StopIteration
 
     cv2.imshow('frame', frame)
-    
+
     cmd = Commander.calculate_command(frame)
     print(cmd)
 
