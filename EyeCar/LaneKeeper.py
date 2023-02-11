@@ -81,3 +81,10 @@ class LaneKeeper:
             cv2.imshow('flat view', flat_view)
 
         return layout
+    
+    def _get_crossroad_distance(self, layout: cv2.Mat) -> float:
+        """
+        Calculates the distance to the nearest crossroad.
+        """
+
+        return np.inf # not implemented

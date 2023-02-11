@@ -1,6 +1,7 @@
 import numpy as np
 
 DEBUG = True
+MODEL_DETECTION = False
 
 MAX_ANGLE: float = 45
 MAX_SPEED: int = 255

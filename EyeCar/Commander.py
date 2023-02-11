@@ -43,17 +43,21 @@ def calculate_command(frame: cv2.Mat) -> str:
     det: Detection = model.forward(frame)
     lane: Lane = lane_keeper.forward(frame)
 
-    # traffic_lights = (TrafficLight(detection)
-    #                   for detection in det.TrafficLights)
-    # pedestrians = (Pedestrian(detection) for detection in det.Pedestrians)
+    if cfg.MODEL_DETECTION:
+        traffic_lights = (TrafficLight(detection)
+                          for detection in det.TrafficLights)
+        pedestrians = (Pedestrian(detection) for detection in det.Pedestrians)
 
-    # if \
-    #         match_condition(traffic_lights, TrafficLight.stop_condition) or \
-    #         match_condition(pedestrians, Pedestrian.stop_condition) or \
-    #         lane.distance_travelled > Car.TARGET_DISTANCE or \
-    #         lane.crossroad_distance < Car.CROSSROAD_STOP_DIST:
-    #     return Command.STOP
+        if \
+            match_condition(traffic_lights, TrafficLight.stop_condition) or \
+            match_condition(pedestrians, Pedestrian.stop_condition):
+            return Command.STOP
 
+    if \
+        lane.distance_travelled > Car.TARGET_DISTANCE or \
+        lane.crossroad_distance < Car.CROSSROAD_STOP_DIST:
+        return Command.STOP
+    
     speed, angle = Car.calc_params(lane.deviation)
     return Command.str(speed, angle)
 
