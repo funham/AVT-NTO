@@ -54,8 +54,8 @@ def calculate_command(frame: cv2.Mat) -> str:
             return Command.STOP
 
     if \
-        lane.distance_travelled > Car.TARGET_DISTANCE or \
-        lane.crossroad_distance < Car.CROSSROAD_STOP_DIST:
+        lane.distance_travelled > cfg.TARGET_DISTANCE or \
+        lane.crossroad_distance < cfg.CROSSROAD_STOP_DIST:
         return Command.STOP
     
     speed, angle = Car.calc_params(lane.deviation)
