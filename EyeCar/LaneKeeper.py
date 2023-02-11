@@ -48,7 +48,7 @@ class LaneKeeper:
             layout_lines[:, mid + int(rdev * mid)] = (255, 0, 0)
             layout_lines[:, mid] = (255, 0, 0)
             
-            cv2.imshow('lines', layout_lines)
+            cv2.imshow('layout lines', layout_lines)
 
             print(f'{ldev=}, {rdev=}')
 
@@ -79,6 +79,5 @@ class LaneKeeper:
 
         if cfg.DEBUG:
             cv2.imshow('flat view', flat_view)
-            cv2.imshow('layout', layout)
 
         return layout

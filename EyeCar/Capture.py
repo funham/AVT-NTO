@@ -33,7 +33,7 @@ class ImageCapture:
             if key == ord('p'):
                 img_idx -= 1
 
-            img_idx = np.clip(img_idx, 0, len(path_list) - 1)
+            img_idx = img_idx % len(path_list)
 
             path = f'{self.path}\{path_list[img_idx]}'
             img = cv2.imread(path)

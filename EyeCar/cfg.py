@@ -1,6 +1,6 @@
 import numpy as np
 
-DEBUG = False
+DEBUG = True
 
 MAX_ANGLE: float = 45
 MAX_SPEED: int = 255
