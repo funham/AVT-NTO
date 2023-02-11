@@ -19,13 +19,17 @@ class LaneKeeper:
         layout = self._get_layout(frame)
         deviation = self._calc_deviation(layout)
         self.dist += self._calc_distance_increment(layout)
+        crossroad_dist = self._get_stopline_dist(layout)
 
-        print(f'distance travelled: {self.dist:.2f}cm')
+
         print(f'{deviation=:.2f}')
+        print(f'distance travelled: {self.dist:.2f}cm')
+        if crossroad_dist < np.inf:
+            print(f'crossroad distance: {crossroad_dist:.2f}cm')
 
         return Lane(deviation=deviation,
                     distance_travelled=self.dist,
-                    crossroad_distance=np.inf)
+                    crossroad_distance=crossroad_dist)
         
     def _calc_deviation(self, layout: cv2.Mat) -> float:
         """
@@ -47,7 +51,7 @@ class LaneKeeper:
 
             cv2.imshow('layout lines', layout_lines)
 
-            print(f'{ldev=:.2f}, {rdev=:.2f}')
+            # print(f'{ldev=:.2f}, {rdev=:.2f}')
 
         return rdev - ldev
 
@@ -107,7 +111,32 @@ class LaneKeeper:
             cv2.imshow('lines', lines)
 
         return flat_view
-    
+
+    def _get_stopline_dist(self, layout: cv2.Mat) -> float:
+        """
+        Get the distance to the stop line.
+        """
+
+        # TODO implement for curved lines
+        
+        h, w = layout.shape
+        hist = layout.sum(axis=1)
+        m = hist.argmax()
+        
+        if hist[m] < 15000:
+            if cfg.DEBUG:
+                cv2.imshow('stopline', layout)
+            return np.inf
+        
+        if cfg.DEBUG:
+            stopline = cv2.cvtColor(layout, cv2.COLOR_GRAY2BGR)
+            stopline = cv2.line(stopline, (0, m), (w, m), (255, 255, 0), 2)
+            cv2.imshow('stopline', stopline)
+
+        
+        dist = (h - m) * cfg.PIXEL_TO_CM_RATIO
+        return dist
+
     class BrokenSegment:
         IMG_H: int = 200
 
@@ -128,6 +157,7 @@ class LaneKeeper:
         Calculates the distance travelled by the car since last frame.
         """
 
+        # TODO look only to the broken lines, not the whole layout
         cnts, _ = cv2.findContours(layout, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         bboxs = map(cv2.boundingRect, cnts)
         bboxs = sorted(bboxs, key=lambda bbox: bbox[1], reverse=True)[:2]

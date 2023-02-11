@@ -1,6 +1,6 @@
 import numpy as np
 
-DEBUG = False
+DEBUG = True
 MODEL_DETECTION = False
 
 MAX_ANGLE: float = 45
