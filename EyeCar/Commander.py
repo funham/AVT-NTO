@@ -26,9 +26,7 @@ def confidence_buffer(func: Callable) -> Callable:
             return cmd
 
         cmd_buff.append(cmd)
-
-        stop_conf = sum(
-            filter(lambda x: x == Command.STOP, cmd_buff)) / cfg.CMD_BUFF_LEN
+        stop_conf = len([... for c in cmd_buff if c == Command.STOP]) / cfg.CMD_BUFF_LEN
 
         if stop_conf > 0.8:
             return Command.STOP
@@ -43,17 +41,21 @@ def calculate_command(frame: cv2.Mat) -> str:
     det: Detection = model.forward(frame)
     lane: Lane = lane_keeper.forward(frame)
 
-    traffic_lights = (TrafficLight(detection)
-                      for detection in det.TrafficLights)
-    pedestrians = (Pedestrian(detection) for detection in det.Pedestrians)
+    if cfg.MODEL_DETECTION:
+        traffic_lights = (TrafficLight(detection)
+                          for detection in det.TrafficLights)
+        pedestrians = (Pedestrian(detection) for detection in det.Pedestrians)
+
+        if \
+            match_condition(traffic_lights, TrafficLight.stop_condition) or \
+            match_condition(pedestrians, Pedestrian.stop_condition):
+            return Command.STOP
 
     if \
-            match_condition(traffic_lights, TrafficLight.stop_condition) or \
-            match_condition(pedestrians, Pedestrian.stop_condition) or \
-            lane.distance_travelled > Car.TARGET_DISTANCE or \
-            lane.crossroad_distance < Car.CROSSROAD_STOP_DIST:
+        lane.distance_travelled > cfg.TARGET_DISTANCE or \
+        lane.crossroad_distance < cfg.CROSSROAD_STOP_DIST:
         return Command.STOP
-
+    
     speed, angle = Car.calc_params(lane.deviation)
     return Command.str(speed, angle)
 
