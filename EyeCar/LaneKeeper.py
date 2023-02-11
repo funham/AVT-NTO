@@ -20,18 +20,13 @@ class LaneKeeper:
         deviation = self._calc_deviation(layout)
         self.dist += self._calc_distance_increment(layout)
 
+        print(f'distance travelled: {self.dist:.2f}cm')
         print(f'{deviation=:.2f}')
 
         return Lane(deviation=deviation,
                     distance_travelled=self.dist,
                     crossroad_distance=np.inf)
-
-    def _calc_distance_increment(self, layout: cv2.Mat) -> float:
-        """
-        Calculates the distance travelled by the car since last frame.
-        """
-        return 0.0  # not implemented
-
+        
     def _calc_deviation(self, layout: cv2.Mat) -> float:
         """
         Calculates the deviation of the car course from the center of the road.
@@ -43,14 +38,16 @@ class LaneKeeper:
         rdev = hist[mid:].argmax() / mid
 
         if cfg.DEBUG:
+            h, w = layout.shape
+            lx, rx = mid - int(ldev * mid), mid + int(rdev * mid)
             layout_lines = cv2.cvtColor(layout, cv2.COLOR_GRAY2BGR)
-            layout_lines[:, mid - int(ldev * mid)] = (255, 0, 0)
-            layout_lines[:, mid + int(rdev * mid)] = (255, 0, 0)
-            layout_lines[:, mid] = (255, 0, 0)
+            layout_lines = cv2.line(layout_lines, (lx, 0), (lx, h), (0, 0, 255), 2)
+            layout_lines = cv2.line(layout_lines, (rx, 0), (rx, h), (0, 0, 255), 2)
+            layout_lines = cv2.line(layout_lines, (mid, 0), (mid, h), (255, 255, 0), 2)
 
             cv2.imshow('layout lines', layout_lines)
 
-            print(f'{ldev=}, {rdev=}')
+            print(f'{ldev=:.2f}, {rdev=:.2f}')
 
         return rdev - ldev
 
@@ -101,9 +98,59 @@ class LaneKeeper:
         flat_view = cv2.warpPerspective(img, M, (out_w, out_h))
 
         if cfg.DEBUG:
+            p_mid_top = np.int32(((tl[0] + tr[0]) // 2, tl[1]))
+            p_mid_bottom = np.int32(((bl[0] + br[0]) // 2, bl[1]))
             lpts = input_pts.reshape((-1, 1, 2)).astype(np.int32)
             lines = cv2.polylines(img, [lpts],
-                                  True, (255, 0, 0), 2)
+                                  True, (255, 0, 0), 2, cv2.LINE_AA)
+            lines = cv2.line(lines, p_mid_bottom, p_mid_top, (0, 0, 255), 1, cv2.LINE_AA)
             cv2.imshow('lines', lines)
 
         return flat_view
+    
+    class BrokenSegment:
+        IMG_H: int = 200
+
+        top: int
+        bot: int
+        
+        def __init__(self, bbox):
+            x, y, w, h = bbox
+            self.top = y
+            self.bot = y + h
+            self.touches_bottom = self.bot == self.IMG_H
+    
+    prev_seg_bot: BrokenSegment = None
+    prev_seg_top: BrokenSegment = None
+
+    def _calc_distance_increment(self, layout: cv2.Mat) -> float:
+        """
+        Calculates the distance travelled by the car since last frame.
+        """
+
+        cnts, _ = cv2.findContours(layout, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        bboxs = map(cv2.boundingRect, cnts)
+        bboxs = sorted(bboxs, key=lambda bbox: bbox[1], reverse=True)[:2]
+        self.BrokenSegment.IMG_H = layout.shape[0]
+        seg_bot, seg_top = map(self.BrokenSegment, bboxs)
+
+        if self.prev_seg_bot and self.prev_seg_top:
+            if self.prev_seg_bot.touches_bottom and not seg_bot.touches_bottom:
+                inc = seg_bot.bot - self.prev_seg_top.bot
+            else:
+                inc = seg_bot.top - self.prev_seg_bot.top
+        else:
+            inc = 0.0
+
+        self.prev_seg_bot = seg_bot
+        self.prev_seg_top = seg_top
+
+        if cfg.DEBUG:
+            broken_line = cv2.cvtColor(layout, cv2.COLOR_GRAY2BGR)
+            for bbox in bboxs:
+                x, y, w, h = bbox
+                broken_line = cv2.rectangle(broken_line, (x, y), (x + w, y + h), (255, 0, 255), 2)
+            
+            cv2.imshow('broken line', broken_line)
+
+        return inc * cfg.PIXEL_TO_CM_RATIO
