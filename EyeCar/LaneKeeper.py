@@ -156,9 +156,16 @@ class LaneKeeper:
         """
         Calculates the distance travelled by the car since last frame.
         """
+        
+        hist = layout.sum(axis=0)
+        mid = hist.size // 2
+        rmaxi = hist[:mid].argmax()
+        lmaxi = hist[mid:].argmax()
 
-        # TODO look only to the broken lines, not the whole layout
-        cnts, _ = cv2.findContours(layout, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        maxi = min(rmaxi, lmaxi)
+        broken_line_slice = layout[:, maxi-10:maxi+40]
+
+        cnts, _ = cv2.findContours(broken_line_slice, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         bboxs = map(cv2.boundingRect, cnts)
         bboxs = sorted(bboxs, key=lambda bbox: bbox[1], reverse=True)[:2]
         self.BrokenSegment.IMG_H = layout.shape[0]
@@ -176,11 +183,11 @@ class LaneKeeper:
         self.prev_seg_top = seg_top
 
         if cfg.DEBUG:
-            broken_line = cv2.cvtColor(layout, cv2.COLOR_GRAY2BGR)
+            broken_line_boxes = cv2.cvtColor(broken_line_slice, cv2.COLOR_GRAY2BGR)
             for bbox in bboxs:
                 x, y, w, h = bbox
-                broken_line = cv2.rectangle(broken_line, (x, y), (x + w, y + h), (255, 0, 255), 2)
+                broken_line_boxes = cv2.rectangle(broken_line_boxes, (x, y), (x + w, y + h), (255, 0, 255), 2)
             
-            cv2.imshow('broken line', broken_line)
+            cv2.imshow('broken line', cv2.resize(broken_line_boxes, (0, 0), fx=3, fy=2))
 
         return inc * cfg.PIXEL_TO_CM_RATIO
