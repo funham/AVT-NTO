@@ -34,6 +34,8 @@ def main_loop() -> None:
     cv2.imshow('frame', frame)
 
     cmd = Commander.calculate_command(frame)
+    if cmd == Commander.Command.STOP:
+        print("STOP")
     print(cmd)
 
 

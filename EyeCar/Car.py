@@ -15,10 +15,10 @@ def constrain(x, min_x, max_x):
 def calc_params(deviation: float) -> Tuple[int, int]:
     global speed, angle
     
-    angle = int(pid(deviation * k_dev))
-    speed = int(cfg.MAX_SPEED - abs(angle) * k_break)
+    angle = pid(deviation * k_dev) if abs(deviation) > 0.1 else 0
+    speed = cfg.MAX_SPEED - abs(angle) * k_break
 
-    speed = constrain(speed, cfg.MIN_SPEED, cfg.MAX_SPEED)
-    angle = constrain(angle, -cfg.MAX_ANGLE, cfg.MAX_ANGLE)
+    speed = int(constrain(speed, cfg.MIN_SPEED, cfg.MAX_SPEED))
+    angle = int(constrain(angle, -cfg.MAX_ANGLE, cfg.MAX_ANGLE))
 
     return speed, angle
