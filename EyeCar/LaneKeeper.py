@@ -13,22 +13,19 @@ class Lane:
 
 
 class LaneKeeper:
-    dist: float = 0.0
-
     def forward(self, frame: cv2.Mat) -> Lane:
         layout = self._get_layout(frame)
         deviation = self._calc_deviation(layout)
-        self.dist += self._calc_distance_increment(layout)
-        crossroad_dist = self._get_stopline_dist(layout)
-
+        self._dist += self._calc_distance_increment(layout)
+        crossroad_dist = self._get_crossroad_distance(layout)
 
         print(f'{deviation=:.2f}')
-        print(f'distance travelled: {self.dist:.2f}cm')
+        print(f'distance travelled: {self._dist:.2f}cm')
         if crossroad_dist < np.inf:
             print(f'crossroad distance: {crossroad_dist:.2f}cm')
 
         return Lane(deviation=deviation,
-                    distance_travelled=self.dist,
+                    distance_travelled=self._dist,
                     crossroad_distance=crossroad_dist)
         
     def _calc_deviation(self, layout: cv2.Mat) -> float:
@@ -76,7 +73,6 @@ class LaneKeeper:
         wscale = 2.0      # scale of the top and the bottom width parameters
 
         h, w, _ = img.shape
-
         
         tl = (w // 2 * (1 + toffset - twidth * wscale), h * (1 - margin - height))  # top left
         bl = (w // 2 * (1 + boffset - bwidth * wscale), h * (1 - margin))           # bottom left
@@ -128,25 +124,11 @@ class LaneKeeper:
         dist = (h - m) * cfg.PIXEL_TO_CM_RATIO
         return dist
 
-    class LayoutSegment:
-        IMG_H: int = 200
-
-        top: int
-        bottom: int
-        
-        def __init__(self, bbox):
-            x, y, w, h = bbox
-            self.top = y
-            self.bottom = y + h
-            self.touches_bottom = self.bottom == self.IMG_H
-    
-    prev_bottom_segment: LayoutSegment = None
-    prev_upper_segment: LayoutSegment = None
-
     def _calc_distance_increment(self, layout: cv2.Mat) -> float:
         """
         Calculates the distance travelled by the car since last frame.
         """
+        LaneKeeper.LayoutSegment.IMG_H = layout.shape[0]
         
         hist = layout.sum(axis=0)
         mid = hist.size // 2
@@ -159,24 +141,23 @@ class LaneKeeper:
         cnts, _ = cv2.findContours(broken_line_slice, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         bboxs = map(cv2.boundingRect, cnts)
         bboxs = sorted(bboxs, key=lambda bbox: bbox[1], reverse=True)[:2]
-        self.LayoutSegment.IMG_H = layout.shape[0]
-        curr_bottom_segment, curr_top_segment = map(self.LayoutSegment, bboxs)
+        curr_bottom_segment, curr_top_segment = map(LaneKeeper.LayoutSegment, bboxs)
 
-        if self.prev_bottom_segment is None:
-            self.prev_bottom_segment = curr_bottom_segment
-            self.prev_upper_segment = curr_top_segment
+        if self._prev_bottom_segment is None:
+            self._prev_bottom_segment = curr_bottom_segment
+            self._prev_upper_segment = curr_top_segment
             
             return 0.0  # no previous frames
         
         # calculating tracking points coordinate difference
-        top_diff = curr_bottom_segment.top - self.prev_bottom_segment.top
-        bottom_diff = curr_bottom_segment.bottom - self.prev_upper_segment.bottom
-        prev_bottom_segment_is_gone = self.prev_bottom_segment.touches_bottom and not curr_bottom_segment.touches_bottom
+        top_diff = curr_bottom_segment.top - self._prev_bottom_segment.top
+        bottom_diff = curr_bottom_segment.bottom - self._prev_upper_segment.bottom
+        prev_bottom_segment_is_gone = self._prev_bottom_segment.touches_bottom and not curr_bottom_segment.touches_bottom
 
         inc = bottom_diff if prev_bottom_segment_is_gone else top_diff
 
-        self.prev_bottom_segment = curr_bottom_segment
-        self.prev_upper_segment = curr_top_segment
+        self._prev_bottom_segment = curr_bottom_segment
+        self._prev_upper_segment = curr_top_segment
 
         if cfg.DEBUG:
             broken_line_boxes = cv2.cvtColor(broken_line_slice, cv2.COLOR_GRAY2BGR)
@@ -184,6 +165,23 @@ class LaneKeeper:
                 x, y, w, h = bbox
                 broken_line_boxes = cv2.rectangle(broken_line_boxes, (x, y), (x + w, y + h), (255, 0, 255), 2)
             
-            cv2.imshow('broken line', cv2.resize(broken_line_boxes, (0, 0), fx=3, fy=2))
+            cv2.imshow('broken line', cv2.resize(broken_line_boxes, (0, 0), fx=1, fy=1))
 
         return inc * cfg.PIXEL_TO_CM_RATIO
+    
+    class LayoutSegment:
+        IMG_H: int = 200
+
+        top: int
+        bottom: int
+        
+        def __init__(self, bbox):
+            x, y, w, h = bbox
+            self.top = y
+            self.bottom = y + h
+            self.touches_bottom = self.bottom == self.IMG_H
+    
+    _dist: float = 0.0
+
+    _prev_bottom_segment: LayoutSegment = None
+    _prev_upper_segment: LayoutSegment = None

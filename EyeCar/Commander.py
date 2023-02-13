@@ -26,7 +26,7 @@ def confidence_buffer(func: Callable) -> Callable:
             return cmd
 
         cmd_buff.append(cmd)
-        stop_conf = len([... for c in cmd_buff if c == Command.STOP]) / cfg.CMD_BUFF_LEN
+        stop_conf = cmd_buff.count(Command.STOP) / cfg.CMD_BUFF_LEN
 
         if stop_conf > 0.8:
             return Command.STOP
