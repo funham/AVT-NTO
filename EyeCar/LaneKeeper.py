@@ -51,8 +51,6 @@ class LaneKeeper:
 
             cv2.imshow('layout lines', layout_lines)
 
-            # print(f'{ldev=:.2f}, {rdev=:.2f}')
-
         return rdev - ldev
 
     def _get_layout(self, img: cv2.Mat) -> cv2.Mat:
@@ -67,13 +65,6 @@ class LaneKeeper:
             cv2.imshow('flat view', flat_view)
 
         return layout
-
-    def _get_crossroad_distance(self, layout: cv2.Mat) -> float:
-        """
-        Calculates the distance to the nearest crossroad.
-        """
-
-        return np.inf  # not implemented
 
     def _get_flat_view(self, img: cv2.Mat) -> cv2.Mat:
         toffset = 0.13    # offset of the transformation, from -1.0 to 1.0, where 0.0 is no offset
@@ -112,9 +103,9 @@ class LaneKeeper:
 
         return flat_view
 
-    def _get_stopline_dist(self, layout: cv2.Mat) -> float:
+    def _get_crossroad_distance(self, layout: cv2.Mat) -> float:
         """
-        Get the distance to the stop line.
+        Calculates the distance to the nearest crossroad.
         """
 
         # TODO implement for curved lines
@@ -137,20 +128,20 @@ class LaneKeeper:
         dist = (h - m) * cfg.PIXEL_TO_CM_RATIO
         return dist
 
-    class BrokenSegment:
+    class LayoutSegment:
         IMG_H: int = 200
 
         top: int
-        bot: int
+        bottom: int
         
         def __init__(self, bbox):
             x, y, w, h = bbox
             self.top = y
-            self.bot = y + h
-            self.touches_bottom = self.bot == self.IMG_H
+            self.bottom = y + h
+            self.touches_bottom = self.bottom == self.IMG_H
     
-    prev_seg_bot: BrokenSegment = None
-    prev_seg_top: BrokenSegment = None
+    prev_bottom_segment: LayoutSegment = None
+    prev_upper_segment: LayoutSegment = None
 
     def _calc_distance_increment(self, layout: cv2.Mat) -> float:
         """
@@ -168,19 +159,24 @@ class LaneKeeper:
         cnts, _ = cv2.findContours(broken_line_slice, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         bboxs = map(cv2.boundingRect, cnts)
         bboxs = sorted(bboxs, key=lambda bbox: bbox[1], reverse=True)[:2]
-        self.BrokenSegment.IMG_H = layout.shape[0]
-        seg_bot, seg_top = map(self.BrokenSegment, bboxs)
+        self.LayoutSegment.IMG_H = layout.shape[0]
+        curr_bottom_segment, curr_top_segment = map(self.LayoutSegment, bboxs)
 
-        if self.prev_seg_bot and self.prev_seg_top:
-            if self.prev_seg_bot.touches_bottom and not seg_bot.touches_bottom:
-                inc = seg_bot.bot - self.prev_seg_top.bot
-            else:
-                inc = seg_bot.top - self.prev_seg_bot.top
-        else:
-            inc = 0.0
+        if self.prev_bottom_segment is None:
+            self.prev_bottom_segment = curr_bottom_segment
+            self.prev_upper_segment = curr_top_segment
+            
+            return 0.0  # no previous frames
+        
+        # calculating tracking points coordinate difference
+        top_diff = curr_bottom_segment.top - self.prev_bottom_segment.top
+        bottom_diff = curr_bottom_segment.bottom - self.prev_upper_segment.bottom
+        prev_bottom_segment_is_gone = self.prev_bottom_segment.touches_bottom and not curr_bottom_segment.touches_bottom
 
-        self.prev_seg_bot = seg_bot
-        self.prev_seg_top = seg_top
+        inc = bottom_diff if prev_bottom_segment_is_gone else top_diff
+
+        self.prev_bottom_segment = curr_bottom_segment
+        self.prev_upper_segment = curr_top_segment
 
         if cfg.DEBUG:
             broken_line_boxes = cv2.cvtColor(broken_line_slice, cv2.COLOR_GRAY2BGR)
