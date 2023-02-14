@@ -141,6 +141,10 @@ class LaneKeeper:
         cnts, _ = cv2.findContours(broken_line_slice, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         bboxs = map(cv2.boundingRect, cnts)
         bboxs = sorted(bboxs, key=lambda bbox: bbox[1], reverse=True)[:2]
+        
+        if len(bboxs) < 2:
+            return 0.0
+        
         curr_bottom_segment, curr_top_segment = map(LaneKeeper.LayoutSegment, bboxs)
 
         if self._prev_bottom_segment is None:

@@ -57,6 +57,7 @@ def calculate_command(frame: cv2.Mat) -> str:
         return Command.STOP
     
     speed, angle = Car.calc_params(lane.deviation)
+    # return Command.str(0, angle)
     return Command.str(speed, angle)
 
 
