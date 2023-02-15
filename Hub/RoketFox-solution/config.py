@@ -1,11 +1,15 @@
-import os
-import time
-from typing import *
-from functools import partial
-from itertools import product
-import cv2
-import numpy as np
-import RPi.GPIO as GPIO
+TESTING = True
 
-TESTING = False
-TARGET_MARKING = [[2, 1], [9, 6]]
+TARGET_MARKING = (2, 2, 2, 2)
+
+
+class ImageDims:
+    WIDTH = 260
+    HEIGHT = 340
+    SIZE = (WIDTH, HEIGHT)
+
+
+class CarriageDims:
+    WIDTH = 10
+    HEIGHT = 17
+    SIZE = (WIDTH, HEIGHT)

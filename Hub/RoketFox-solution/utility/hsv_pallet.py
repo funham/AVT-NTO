@@ -14,7 +14,7 @@ while True:
     h = cv2.getTrackbarPos('H', 'hsv_pallet')
     s = cv2.getTrackbarPos('S', 'hsv_pallet')
     v = cv2.getTrackbarPos('V', 'hsv_pallet')
-    
+
     img[:] = [h, s, v]
     img = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
     cv2.imshow('hsv_pallet', img)
