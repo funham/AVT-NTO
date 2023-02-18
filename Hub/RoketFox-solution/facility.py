@@ -24,8 +24,8 @@ def __pix_to_coords(pix: np.ndarray) -> np.ndarray:
     Convert pixels to coordinates.
     '''
     x, y = pix
-    coord_w, coord_h = cfg.CarriageDims.SIZE
-    img_w, img_h = cfg.ImageDims.SIZE
+    coord_w, coord_h = cfg.CARRIAGE_SIZE
+    img_w, img_h = cfg.IMG_SIZE
 
     return (x/img_w*coord_w, y/img_h*coord_h)
 

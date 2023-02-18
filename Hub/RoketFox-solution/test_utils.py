@@ -23,7 +23,6 @@ class ImageCapture:
             key = cv2.waitKey(0)
 
             if key == 27 or key == ord('q'):
-                cv2.destroyAllWindows()
                 yield False, None
 
             if key == ord('n'):

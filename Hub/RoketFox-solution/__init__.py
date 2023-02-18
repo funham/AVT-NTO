@@ -1,14 +1,14 @@
 import config as cfg
 import cv2
 import numpy as np
-import facility as fcl
+from facility import send_to_drone
 from typing import *
 from test_utils import ImageCapture
 from Cargo import Cargo
 from Color import Color
 
 
-def preprocessing(img: np.ndarray) -> np.ndarray:
+def preprocessing(img: cv2.Mat) -> np.ndarray:
     '''
     Basic preprocessing of the image like crop, warp and resize.
     '''
@@ -16,7 +16,7 @@ def preprocessing(img: np.ndarray) -> np.ndarray:
                               [409, 104],   # right_top    |
                               [428, 390],   # right_bottom |
                               [159, 390]])  # left_bottom  |
-    out_width, out_height = cfg.ImageDims.SIZE
+    out_width, out_height = cfg.IMG_SIZE
 
     corners = np.float32(
         [[0, 0], [out_width, 0], [out_width, out_height], [0, out_height]])
@@ -44,14 +44,17 @@ def main():
 
         for i, cargo in enumerate(weights):
             print("=======================")
+
             if cfg.TESTING:
                 cv2.imshow(f'n{i}', cargo.get_face())
                 print(f"{cargo.marking = }")
                 print(f"{cargo.coords = }")
+
             if cargo.marking == cfg.TARGET_MARKING:
-                fcl.send_to_drone(cargo.coords)
+                send_to_drone(cargo.coords)
 
     print('Exiting main loop')
+    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

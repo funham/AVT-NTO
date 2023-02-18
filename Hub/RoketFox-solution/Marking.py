@@ -26,9 +26,10 @@ class Marking:
         '''
         while color_matrix[0][0] + color_matrix[0][1] != 11 and color_matrix[0][0] + color_matrix[1][0] == 11:
             color_matrix = np.rot90(color_matrix)
+            
         return color_matrix
 
-    def __decoded(self) -> np.ndarray:
+    def decoded(self) -> np.ndarray:
         cropped_sectors = self.__cropped_marks()
 
         get_avg_color = partial(np.mean, axis=(0, 1))
@@ -40,9 +41,9 @@ class Marking:
         colors = self.__rotate_color_matrix(colors)
 
         return colors.flatten()
-
+    
     def __repr__(self):
-        return f"{self.__decoded()}"
+        return str(self.decoded())
 
-    def __eq__(self, __o: tuple) -> bool:
-        return (self.__decoded() == __o).all
+    def __eq__(self, mark_code: tuple) -> bool:
+        return (self.decoded() == mark_code).all()

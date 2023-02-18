@@ -12,14 +12,17 @@ class Cargo:
         self.face_dims = (200, 200)  # dimensions of the output face
         self.marking = Marking(self.get_face())
 
-    def __face_center(self, x, y, w, h) -> Tuple[int, int]:
-        return (x + w//2, y + h//2)
+    def __face_center(self) -> Tuple[int, int]:
+        bbox = cv2.minAreaRect(self.cnt)
+        center = bbox[0]
+        
+        return center
 
     @property
-    def coords(self) -> Tuple[int, int]:
-        return self.__face_center(*cv2.boundingRect(self.cnt))
+    def coords(self) -> Tuple:
+        return self.__face_center()
 
-    def get_face(self) -> np.ndarray:
+    def get_face(self) -> cv2.Mat:
         width, height = self.face_dims
 
         rect = cv2.minAreaRect(self.cnt)
@@ -32,7 +35,7 @@ class Cargo:
         return face
 
     @staticmethod
-    def find_weights(img: cv2.Mat) -> Generator:
+    def find_weights(img: cv2.Mat) -> Iterable:
         '''
         Find weights on the image
         '''
