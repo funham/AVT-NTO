@@ -39,4 +39,4 @@ if __name__ == '__main__':
 
     finally:
         print('Dont get hit by a car')
-        io_client.send_cmd(Commander.Command.STOP)
+        io_client.send_msg(Commander.Command.STOP)
