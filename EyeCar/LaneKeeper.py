@@ -67,9 +67,9 @@ class LaneKeeper:
         toffset = 0.13    # offset of the transformation, from -1.0 to 1.0, where 0.0 is no offset
         boffset = 0.171   # offset of the transformation, from -1.0 to 1.0, where 0.0 is no offset
         margin = 0.1      # bottom margin of the transformation
-        height = 0.5      # height of the perspective
+        height = 0.25      # height of the perspective
         bwidth = 0.4      # width of the bottom line of the perspective, relative to the image width, 1.0 is full width
-        twidth = 0.17     # width of the top line of the perspective, relative to the image width, 1.0 is full width
+        twidth = 0.34     # width of the top line of the perspective, relative to the image width, 1.0 is full width
         wscale = 2.0      # scale of the top and the bottom width parameters
 
         h, w, _ = img.shape
@@ -141,6 +141,10 @@ class LaneKeeper:
         cnts, _ = cv2.findContours(broken_line_slice, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         bboxs = map(cv2.boundingRect, cnts)
         bboxs = sorted(bboxs, key=lambda bbox: bbox[1], reverse=True)[:2]
+        
+        if len(bboxs) < 2:
+            return 0.0
+        
         curr_bottom_segment, curr_top_segment = map(LaneKeeper.LayoutSegment, bboxs)
 
         if self._prev_bottom_segment is None:
