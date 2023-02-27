@@ -23,6 +23,12 @@ class IOClient(ABC):
     def send_msg(self, command: str):
         pass
 
+    def handle_keyboard_input(self):
+        key = cv2.waitKey(1)
+
+        if key in (27, ord('q')):
+            raise StopIteration
+
 
 class LocalCameraClient(IOClient):
     def __init__(self):
@@ -50,6 +56,9 @@ class ImageFolderClient(IOClient):
     def send_msg(self, command: str) -> None:
         print('-----------------')
         print(f'Sending command:\n {command}')
+
+    def handle_keyboard_input(self):
+        pass
 
     def __reader(self) -> Iterator[cv2.Mat | None]:
         path_list = [path for path in os.listdir(

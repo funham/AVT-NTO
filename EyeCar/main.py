@@ -11,17 +11,14 @@ io_client = get_io_client(cfg.INPUT_MODE)
 
 def main_loop() -> None:
     frame = io_client.read()
+
+    if frame is None:
+        return
+    
     cv2.imshow('frame', frame)
 
-    if cfg.INPUT_MODE != cfg.InputType.IMAGE_FOLDER:
-        key = cv2.waitKey(1)
-
-        if key in (27, ord('q')):
-            raise StopIteration
+    io_client.handle_keyboard_input()
     
-    if frame is None:
-        raise StopIteration
-
     cmd = Commander.calculate_command(frame)
     io_client.send_msg(cmd)
 
