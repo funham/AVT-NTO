@@ -3,6 +3,8 @@ from CarStatus import CarStatus
 
 # "friend" of Car status
 # Singleton
+
+
 class CarControl:
     status = CarStatus()
     handlers: list[IDetectionHandler]
@@ -18,7 +20,7 @@ class CarControl:
             handler.set_control(self.status, detections)
 
         cmd = f'SPEED:{self.status.speed}\nANGLE:{self.status.angle}\n'
-        self.status.reset() # reseting on each cycle
+        self.status.reset()  # reseting on each cycle
 
         return cmd
 
