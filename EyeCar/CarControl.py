@@ -4,7 +4,7 @@ from CarStatus import CarStatus
 # "friend" of Car status
 # Singleton
 class CarControl:
-    status: CarStatus
+    status = CarStatus()
     handlers: list[IDetectionHandler]
 
     def __new__(cls):
@@ -17,9 +17,10 @@ class CarControl:
         for handler in self.handlers:
             handler.set_control(self.status, detections)
 
+        cmd = f'SPEED:{self.status.speed}\nANGLE:{self.status.angle}\n'
         self.status.reset() # reseting on each cycle
 
-        return f'SPEED:{self.status.speed}\nANGLE:{self.status.angle}\n'
+        return cmd
 
     def register_handler(self, handler: IDetectionHandler):
         self.handlers.append(handler)

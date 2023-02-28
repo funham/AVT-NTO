@@ -25,11 +25,10 @@ def main_loop() -> None:
 
     if frame is None:
         return
-    
-    cv2.imshow('frame', frame)
 
+    cv2.imshow('frame', frame)
     io_client.handle_keyboard_input()
-    
+
     detections = detector.forward(frame)
     cmd = CarControl().get_command(detections)
     io_client.send_msg(cmd)

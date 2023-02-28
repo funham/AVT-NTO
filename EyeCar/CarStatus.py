@@ -11,8 +11,8 @@ class CarStatus:
         RIGHT = 2
         STRAIGHT = 3
 
-    _angle: float
-    _suspended: bool
+    _angle: float = 0
+    _suspended: bool = False
     
     _set_speed_vals: list[float]
     _last_stop_time: float
@@ -25,6 +25,7 @@ class CarStatus:
         """
         self._requested_stop = False
         self._set_speed_vals.clear()
+        self.speed = cfg.CAR_MAX_SPEED
 
     @property
     def angle(self):
@@ -32,7 +33,7 @@ class CarStatus:
     
     @angle.setter
     def angle(self, val):
-        self._angle = np.clip(val, -cfg.MAX_ANGLE, cfg.MAX_ANGLE)
+        self._angle = np.clip(val, -cfg.CAR_MAX_ANGLE, cfg.CAR_MAX_ANGLE)
 
     @property
     def speed(self):
