@@ -8,7 +8,7 @@ class IDetectionHandler(ABC):
         pass
 
     @abstractmethod
-    def set_control(detections: dict, car: CarStatus) -> None:
+    def set_control(self, detections: dict, car: CarStatus) -> None:
         pass
 
 
@@ -25,15 +25,12 @@ class CrossroadHandler(IDetectionHandler):
         except KeyError:
             return print("key not found")
 
-        if det.crossroad_dist is None:
-            return
-        
         # if we are at crossroad zone
         if det.crossroad_dist < cfg.CROSSROAD_STOP_DIST:
             if det.traffic_light_signal == 'red':
                 car.stop()
 
-            elif car.stop_duration < cfg.CROSSROAD_STOP_TIME:
+            if car.stop_duration < cfg.CROSSROAD_STOP_TIME:
                 car.stop()
 
         elif det.crossroad_dist < cfg.CROSSROAD_SLOW_DOWN_DIST:

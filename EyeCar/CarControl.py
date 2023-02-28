@@ -17,7 +17,7 @@ class CarControl:
     def get_command(self, detections: dict) -> str:
         """ Returns a `Command` based on `detections` data """
         for handler in self.handlers:
-            handler.set_control(self.status, detections)
+            handler.set_control(detections, self.status)
 
         cmd = f'SPEED:{self.status.speed}\nANGLE:{self.status.angle}\n'
         self.status.reset()  # reseting on each cycle

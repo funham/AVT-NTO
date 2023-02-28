@@ -3,7 +3,6 @@ import cfg
 
 from typing import *
 from beholder2048squad.Server import Server
-import Commander
 
 
 serv = Server(udp_host=cfg.UDP_HOST, udp_port=cfg.UDP_PORT,
@@ -17,7 +16,7 @@ def main_loop() -> None:
     if cv2.waitKey(1) == ord('q') or frame is None:
         raise StopIteration
 
-    serv.send_msg('')
+    serv.send_msg('SPEED:0')
 
 if __name__ == '__main__':
     try:
@@ -29,4 +28,3 @@ if __name__ == '__main__':
 
     finally:
         print('Dont get hit by a car')
-        serv.send_msg(Commander.Command.STOP)
