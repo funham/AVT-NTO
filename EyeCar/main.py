@@ -1,38 +1,37 @@
+import cfg
 import cv2
-import Commander
 
-from typing import *
-from beholder2048squad.Server import Server
+from io_client import get_io_client
+from CarControl import CarControl
 
+from Detector import GlobalDetectionModel, YoloV5Detector, YoloV8Detector
+from LaneKeeper import LaneDetector
 
-serv = Server(9090)
+from DetectionHandler import LaneHandler
 
-locked = False
+io_client = get_io_client(cfg.INPUT_MODE)
+detector = GlobalDetectionModel()
+control = CarControl()
+
+# detector.add_detector(YoloV5Detector("/Models/TrafficLightsDetector.model"))
+# detector.add_detector(YoloV8Detector("/Models/SignPedestrianDetector.model"))
+detector.add_detector(LaneDetector())
+
+control.register_handler(LaneHandler())
 
 def main_loop() -> None:
-    global locked
+    frame = io_client.read()
 
-    frame = serv.chat_img()
+    if frame is None:
+        return
+
     cv2.imshow('frame', frame)
 
-    key = cv2.waitKey(1)
-
-    if key == ord('q') or frame is None:
-        raise StopIteration
-
-
-    cmd = Commander.calculate_command(frame)
+    detections = detector.forward(frame)
+    cmd = control.get_command(detections)
     
-    if key == ord('s'):
-        locked = True
-
-    if key == ord('g'):
-        locked = False
-    
-    serv.chat_cmd(cmd if not locked else Commander.Command.STOP)
-
-    print("cmd:")
-    print(cmd)
+    io_client.send_msg(cmd)
+    io_client.handle_keyboard_input()
 
 
 if __name__ == '__main__':
@@ -45,4 +44,4 @@ if __name__ == '__main__':
 
     finally:
         print('Dont get hit by a car')
-        serv.chat_cmd(Commander.Command.STOP)
+        io_client.send_msg('SPEED:0\n')
