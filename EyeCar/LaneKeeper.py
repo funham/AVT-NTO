@@ -1,19 +1,11 @@
 import cv2
 import numpy as np
 import cfg
-
-from dataclasses import dataclass
-
-
-@dataclass
-class Lane:
-    deviation: float
-    distance_travelled: int
-    crossroad_distance: int
+from Detector import IDetector
 
 
-class LaneKeeper:
-    def forward(self, frame: cv2.Mat) -> Lane:
+class LaneDetector(IDetector):
+    def forward(self, frame: cv2.Mat) -> dict:
         layout = self._get_layout(frame)
         deviation = self._calc_deviation(layout)
         self._dist += self._calc_distance_increment(layout)
@@ -23,10 +15,12 @@ class LaneKeeper:
         print(f'distance travelled: {self._dist:.2f}cm')
         if crossroad_dist < np.inf:
             print(f'crossroad distance: {crossroad_dist:.2f}cm')
+        else:
+            print('no crossroad detected')
 
-        return Lane(deviation=deviation,
-                    distance_travelled=self._dist,
-                    crossroad_distance=crossroad_dist)
+        return {'lane_deviation': deviation, 
+                'distance_travelled': self._dist, 
+                'crossroad_distance': crossroad_dist}
         
     def _calc_deviation(self, layout: cv2.Mat) -> float:
         """
@@ -128,43 +122,32 @@ class LaneKeeper:
         """
         Calculates the distance travelled by the car since last frame.
         """
-        LaneKeeper.LayoutSegment.IMG_H = layout.shape[0]
-        
-        hist = layout.sum(axis=0)
-        mid = hist.size // 2
-        rmaxi = hist[:mid].argmax()
-        lmaxi = hist[mid:].argmax()
+        h, w = layout.shape
+        broken_line_image = layout[:, :w//2]
 
-        maxi = min(rmaxi, lmaxi)
-        broken_line_slice = layout[:, maxi-10:maxi+40]
-
-        cnts, _ = cv2.findContours(broken_line_slice, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        cnts, _ = cv2.findContours(broken_line_image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         bboxs = map(cv2.boundingRect, cnts)
         bboxs = sorted(bboxs, key=lambda bbox: bbox[1], reverse=True)[:2]
         
         if len(bboxs) < 2:
-            return 0.0
+            return 0.0  # couldn't find two bounding boxes, so assume no change in distance.
         
-        curr_bottom_segment, curr_top_segment = map(LaneKeeper.LayoutSegment, bboxs)
+        curr_segments = list(map(self.LayoutSegment, bboxs))
 
-        if self._prev_bottom_segment is None:
-            self._prev_bottom_segment = curr_bottom_segment
-            self._prev_upper_segment = curr_top_segment
+        if not self._prev_segments:
+            self._prev_segments = curr_segments            
             
             return 0.0  # no previous frames
-        
+
         # calculating tracking points coordinate difference
-        top_diff = curr_bottom_segment.top - self._prev_bottom_segment.top
-        bottom_diff = curr_bottom_segment.bottom - self._prev_upper_segment.bottom
-        prev_bottom_segment_is_gone = self._prev_bottom_segment.touches_bottom and not curr_bottom_segment.touches_bottom
-
-        inc = bottom_diff if prev_bottom_segment_is_gone else top_diff
-
-        self._prev_bottom_segment = curr_bottom_segment
-        self._prev_upper_segment = curr_top_segment
+        # 0th index stands for bottom segment, and 1st index stands for top segment
+        if self._prev_segments[0].touches_bottom and not curr_segments[0].touches_bottom:
+            inc = curr_segments[0].top - self._prev_segments[0].top
+        else:
+            inc = curr_segments[0].bottom - self._prev_segments[1].bottom
 
         if cfg.DEBUG:
-            broken_line_boxes = cv2.cvtColor(broken_line_slice, cv2.COLOR_GRAY2BGR)
+            broken_line_boxes = cv2.cvtColor(broken_line_image, cv2.COLOR_GRAY2BGR)
             for bbox in bboxs:
                 x, y, w, h = bbox
                 broken_line_boxes = cv2.rectangle(broken_line_boxes, (x, y), (x + w, y + h), (255, 0, 255), 2)
@@ -173,9 +156,8 @@ class LaneKeeper:
 
         return inc * cfg.PIXEL_TO_CM_RATIO
     
-    class LayoutSegment:
-        IMG_H: int = 200
 
+    class LayoutSegment:
         top: int
         bottom: int
         
@@ -183,9 +165,10 @@ class LaneKeeper:
             x, y, w, h = bbox
             self.top = y
             self.bottom = y + h
-            self.touches_bottom = self.bottom == self.IMG_H
+        
+        @property
+        def touches_bottom(self):
+            return self.bottom == cfg.IMG_H
     
     _dist: float = 0.0
-
-    _prev_bottom_segment: LayoutSegment = None
-    _prev_upper_segment: LayoutSegment = None
+    _prev_segments: list[LayoutSegment] = []

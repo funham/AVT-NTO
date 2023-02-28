@@ -15,13 +15,11 @@ class InputType(Enum):
 
 
 class IOClient(ABC):
-    @abstractmethod
     def read(self) -> cv2.Mat | None:
-        pass
+        print('-----------------')
 
-    @abstractmethod
-    def send_msg(self, command: str):
-        pass
+    def send_msg(self, command: str) -> None:
+        print(f'Sending command:\n{command}')
 
     def handle_keyboard_input(self):
         key = cv2.waitKey(1)
@@ -37,13 +35,11 @@ class LocalCameraClient(IOClient):
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
     
     def read(self) -> cv2.Mat | None:
+        super().read()
         ret, frame = self.cap.read()
     
         return frame if ret else None
     
-    def send_msg(self, command: str) -> None:
-        print(f'Sending command:\n {command}')
-        print('-----------------')
 
 class ImageFolderClient(IOClient):
     def __init__(self, path):
@@ -51,14 +47,14 @@ class ImageFolderClient(IOClient):
         self.reader = self.__reader()
 
     def read(self) -> cv2.Mat | None:
+        super().read()
         return next(self.reader)
-    
-    def send_msg(self, command: str) -> None:
-        print('-----------------')
-        print(f'Sending command:\n {command}')
 
     def handle_keyboard_input(self):
-        pass
+        self.last_pressed_key = cv2.waitKey(0)
+
+        if self.last_pressed_key in (ord('q'), 27):
+            raise StopIteration
 
     def __reader(self) -> Iterator[cv2.Mat | None]:
         path_list = [path for path in os.listdir(
@@ -70,16 +66,10 @@ class ImageFolderClient(IOClient):
         yield cv2.imread(path)
 
         while True:
-            key = cv2.waitKey(0)
-
-            if key == 27 or key == ord('q'):
-                cv2.destroyAllWindows()
-                yield None
-
-            if key == ord('n'):
+            if self.last_pressed_key == ord('n'):
                 img_idx += 1
 
-            if key == ord('p'):
+            if self.last_pressed_key == ord('p'):
                 img_idx -= 1
 
             img_idx = img_idx % len(path_list)
@@ -98,9 +88,11 @@ class ServerCameraClient(IOClient):
         self._server = beholder2048squad.Server.Server(udp_host, udp_port, tcp_host, tcp_port)
 
     def read(self) -> cv2.Mat | None:
+        super().read()
         return self._server.recv_img()
     
     def send_msg(self, command: str) -> None:
+        super().send_msg(command)
         self._server.send_msg(command)
 
 

@@ -1,29 +1,37 @@
 import cfg
-
 import cv2
-import Commander
+
 from io_client import get_io_client
+from CarControl import CarControl
 
-from typing import *
+from Detector import GlobalDetectionModel, YoloV5Detector, YoloV8Detector
+from LaneKeeper import LaneDetector
 
+from DetectionHandler import LaneHandler
 
 io_client = get_io_client(cfg.INPUT_MODE)
+detector = GlobalDetectionModel()
+control = CarControl()
+
+# detector.add_detector(YoloV5Detector("/Models/TrafficLightsDetector.model"))
+# detector.add_detector(YoloV8Detector("/Models/SignPedestrianDetector.model"))
+detector.add_detector(LaneDetector())
+
+control.register_handler(LaneHandler())
 
 def main_loop() -> None:
     frame = io_client.read()
 
     if frame is None:
         return
-    
+
     cv2.imshow('frame', frame)
 
-    io_client.handle_keyboard_input()
+    detections = detector.forward(frame)
+    cmd = control.get_command(detections)
     
-    cmd = Commander.calculate_command(frame)
     io_client.send_msg(cmd)
-
-    print("cmd:")
-    print(cmd)
+    io_client.handle_keyboard_input()
 
 
 if __name__ == '__main__':
@@ -36,4 +44,4 @@ if __name__ == '__main__':
 
     finally:
         print('Dont get hit by a car')
-        io_client.send_msg(Commander.Command.STOP)
+        io_client.send_msg('SPEED:0\n')
