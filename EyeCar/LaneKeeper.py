@@ -25,31 +25,33 @@ class LaneDetector(IDetector):
     def _calc_deviation(self, layout: cv2.Mat) -> float:
         """
         Calculates the deviation of the car course from the center of the road.
-        returns values from -1.0 to 1.0, where 0.0 is the center of the road.
+        returns values from `-1.0` to `1.0`, where `0.0` is the center of the road.
         """
         hist = layout.sum(axis=0)
-        mid = hist.size // 2
-        ldev = 1 - hist[:mid].argmax() / mid
-        rdev = hist[mid:].argmax() / mid
+        imid = hist.size // 2
+
+        # relative deviation of a left and right layout lines from center of an image
+        ldev = 1 - hist[:imid].argmax() / imid
+        rdev = hist[imid:].argmax() / imid
+
+        deviation = rdev - ldev  # if lines are equally distanced from center then deviation is zero 
 
         if cfg.DEBUG:
             h, w = layout.shape
-            lx, rx = mid - int(ldev * mid), mid + int(rdev * mid)
+            lx, rx = imid - int(ldev * imid), imid + int(rdev * imid)
             layout_lines = cv2.cvtColor(layout, cv2.COLOR_GRAY2BGR)
             layout_lines = cv2.line(layout_lines, (lx, 0), (lx, h), (0, 0, 255), 2)
             layout_lines = cv2.line(layout_lines, (rx, 0), (rx, h), (0, 0, 255), 2)
-            layout_lines = cv2.line(layout_lines, (mid, 0), (mid, h), (255, 255, 0), 2)
+            layout_lines = cv2.line(layout_lines, (imid, 0), (imid, h), (255, 255, 0), 2)
 
             cv2.imshow('layout lines', layout_lines)
 
-        return rdev - ldev
+        return deviation
 
     def _get_layout(self, img: cv2.Mat) -> cv2.Mat:
-        # perspective transformation
         flat_view = self._get_flat_view(img)
-
-        # binarization
         hsv = cv2.cvtColor(flat_view, cv2.COLOR_BGR2HSV)
+
         layout = cv2.inRange(hsv, (0, 0, 200), (180, 150, 255))
 
         if cfg.DEBUG:
@@ -58,6 +60,8 @@ class LaneDetector(IDetector):
         return layout
 
     def _get_flat_view(self, img: cv2.Mat) -> cv2.Mat:
+        """Returns a view of the image with the road straightened out."""
+
         toffset = 0.13    # offset of the transformation, from -1.0 to 1.0, where 0.0 is no offset
         boffset = 0.171   # offset of the transformation, from -1.0 to 1.0, where 0.0 is no offset
         margin = 0.1      # bottom margin of the transformation
@@ -94,28 +98,27 @@ class LaneDetector(IDetector):
         return flat_view
 
     def _get_crossroad_distance(self, layout: cv2.Mat) -> float:
-        """
-        Calculates the distance to the nearest crossroad.
-        """
+        """Calculates the distance to the nearest crossroad."""
 
         # TODO implement for curved lines
         
         h, w = layout.shape
-        hist = layout.sum(axis=1)
-        m = hist.argmax()
+        hist = layout.sum(axis=1) # vertical histogram of a layout
+        maxi = hist.argmax() # index of a brightest row in on the layout, supposedly a crossroad.
         
-        if hist[m] < 15000:
+        # if the brightest row is not bright enough to be a crossroad then no crossroad detected
+        if hist[maxi] < 15000:
             if cfg.DEBUG:
                 cv2.imshow('stopline', layout)
             return np.inf
         
         if cfg.DEBUG:
             stopline = cv2.cvtColor(layout, cv2.COLOR_GRAY2BGR)
-            stopline = cv2.line(stopline, (0, m), (w, m), (255, 255, 0), 2)
+            stopline = cv2.line(stopline, (0, maxi), (w, maxi), (255, 255, 0), 2)
             cv2.imshow('stopline', stopline)
 
         
-        dist = (h - m) * cfg.PIXEL_TO_CM_RATIO
+        dist = (h - maxi) * cfg.PIXEL_TO_CM_RATIO
         return dist
 
     def _calc_distance_increment(self, layout: cv2.Mat) -> float:
@@ -158,13 +161,10 @@ class LaneDetector(IDetector):
     
 
     class LayoutSegment:
-        top: int
-        bottom: int
-        
         def __init__(self, bbox):
             x, y, w, h = bbox
-            self.top = y
-            self.bottom = y + h
+            self.top: int = y
+            self.bottom: int = y + h
         
         @property
         def touches_bottom(self):
