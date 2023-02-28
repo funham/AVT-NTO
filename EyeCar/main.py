@@ -1,23 +1,18 @@
 import cfg
-
 import cv2
 
 from io_client import get_io_client
 from CarControl import CarControl
 
-from Detector import GlobalDetector
-from Detector import TrafficLightDetector, PedestrianDetector
+from Detector import GlobalDetectionModel, YoloV5Detector, YoloV8Detector
 from LaneKeeper import LaneDetector
 
-from typing import *
-
 io_client = get_io_client(cfg.INPUT_MODE)
-detector = GlobalDetector()
+detector = GlobalDetectionModel()
 
-detector.add_model(TrafficLightDetector())
-detector.add_model(PedestrianDetector())
-detector.add_model(LaneDetector())
-...
+detector.add_detector(YoloV5Detector("/Models/TrafficLightsDetector.model"))
+detector.add_detector(YoloV8Detector("/Models/SignPedestrianDetector.model"))
+detector.add_detector(LaneDetector())
 
 
 def main_loop() -> None:

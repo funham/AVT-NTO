@@ -1,9 +1,14 @@
 import numpy as np
 from io_client import InputType
 
+
 INPUT_MODE = InputType.SERVER_CAMERA
 DEBUG = True
 MODEL_DETECTION = False
+
+IMG_W = 640
+IMG_H = 480
+IMG_SHAPE = (IMG_W, IMG_H)
 
 CAR_MAX_ANGLE: float = 45
 CAR_MAX_SPEED: int = 255
