@@ -15,9 +15,9 @@ class CarStatus:
     _angle: float = 0
     _suspended: bool = False
 
-    _set_speed_vals: list[float]
-    _last_stop_time: float
-    _requested_stop: bool
+    _set_speed_vals: list[float] = []
+    _last_stop_time: float = 0
+    _requested_stop: bool = False
 
     def reset(self):
         """

@@ -2,9 +2,8 @@ import numpy as np
 from io_client import InputType
 
 
-INPUT_MODE = InputType.SERVER_CAMERA
+INPUT_MODE = InputType.IMAGE_FOLDER
 DEBUG = True
-MODEL_DETECTION = False
 
 IMG_W = 640
 IMG_H = 480
@@ -35,5 +34,4 @@ TCP_HOST = "192.168.17.46"
 TCP_PORT = 5001
 
 IMG_SOURCE_FOLDER_PATH = r'C:\Users\fun1h\Documents\AVT-NTO\EyeCar\images'
-PEDESTRIAN_MODEL_PATH = ''
-TRAFFIC_LIGHT_MODEL_PATH = ''
+MODEL_FOLDER_PATH = r''

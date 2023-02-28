@@ -2,7 +2,7 @@ import cfg
 from abc import ABC, abstractmethod
 from CarStatus import CarStatus
 
-class IDetectionHandler(ABC):
+class DetectionHandler(ABC):
     """ Changes car status based on detections data """
     class DetectionParserBase(ABC):
         pass
@@ -12,8 +12,8 @@ class IDetectionHandler(ABC):
         pass
 
 
-class CrossroadHandler(IDetectionHandler):
-    class DetectionParser(IDetectionHandler.DetectionParserBase):
+class CrossroadHandler(DetectionHandler):
+    class DetectionParser(DetectionHandler.DetectionParserBase):
         def __init__(self, data: dict):
             self.crossroad_dist = data['crossroad_distance']
             self.traffic_light_signal = data['traffic_light']
@@ -36,8 +36,8 @@ class CrossroadHandler(IDetectionHandler):
         elif det.crossroad_dist < cfg.CROSSROAD_SLOW_DOWN_DIST:
             car.speed = cfg.CROSSROAD_SPEED_LIMIT
 
-class PedestrianHandler(IDetectionHandler):
-    class DetectionParser(IDetectionHandler.DetectionParserBase):
+class PedestrianHandler(DetectionHandler):
+    class DetectionParser(DetectionHandler.DetectionParserBase):
         def __init__(self, data: dict):
             self.pedestrians: list = data['pedestrians']
 
@@ -56,3 +56,22 @@ class PedestrianHandler(IDetectionHandler):
         elif min_dist <= cfg.PEDESTRIAN_SLOW_DOWN_DISTANCE:
             car.speed = cfg.PEDESTRIAN_SLOW_DOWN_DISTANCE
             return 
+
+
+class LaneHandler(DetectionHandler):
+    class DetectionParser(DetectionHandler.DetectionParserBase):
+        def __init__(self, data: dict):
+            self.deviation: float = data['lane_deviation']
+
+    # TODO add PID
+    def set_control(self, detections: dict, car: CarStatus) -> None:
+        try:
+            det = self.DetectionParser(detections)
+        except KeyError:
+            return print("key not found")
+        
+        k_dev = cfg.CAR_MAX_ANGLE / cfg.MAX_DEVIATION
+        k_turn_slowdown = 0.8
+
+        car.angle = det.deviation * k_dev  # adjusting angle to deviation
+        car.speed = cfg.CAR_MAX_SPEED - abs(det.deviation) * k_dev * k_turn_slowdown  # adjusting speed to be slower on tight turns 
