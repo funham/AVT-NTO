@@ -19,9 +19,9 @@ class IOClient(ABC):
     def read(self) -> cv2.Mat | None:
         pass
 
-    @abstractmethod
-    def send_msg(self, command: str):
-        pass
+    def send_msg(self, command: str) -> None:
+        print(f'Sending command:\n {command}')
+        print('-----------------')
 
     def handle_keyboard_input(self):
         key = cv2.waitKey(1)
@@ -41,9 +41,6 @@ class LocalCameraClient(IOClient):
     
         return frame if ret else None
     
-    def send_msg(self, command: str) -> None:
-        print(f'Sending command:\n {command}')
-        print('-----------------')
 
 class ImageFolderClient(IOClient):
     def __init__(self, path):
@@ -52,10 +49,6 @@ class ImageFolderClient(IOClient):
 
     def read(self) -> cv2.Mat | None:
         return next(self.reader)
-    
-    def send_msg(self, command: str) -> None:
-        print('-----------------')
-        print(f'Sending command:\n {command}')
 
     def handle_keyboard_input(self):
         pass
@@ -101,6 +94,7 @@ class ServerCameraClient(IOClient):
         return self._server.recv_img()
     
     def send_msg(self, command: str) -> None:
+        super().send_msg(command)
         self._server.send_msg(command)
 
 

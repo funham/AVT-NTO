@@ -18,7 +18,7 @@ def calc_params(deviation: float) -> Tuple[int, int]:
     angle = deviation * k_dev if abs(deviation) > 0.1 else 0
     speed = cfg.MAX_SPEED - abs(angle) * k_break
 
-    speed = int(constrain(speed, cfg.MIN_SPEED, cfg.MAX_SPEED))
+    speed = int(constrain(speed, cfg.CAR_MIN_SPEED, cfg.MAX_SPEED))
     angle = int(constrain(angle, -cfg.MAX_ANGLE, cfg.MAX_ANGLE))
 
     return speed, angle
