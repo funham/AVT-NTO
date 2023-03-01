@@ -1,3 +1,10 @@
+"""
+Entry point of the Sever (PC) side. 
+
+Here we create IO client, setting up all the detectors, reading and 
+handling frames and send commands to the car.
+"""
+
 import cfg
 import cv2
 

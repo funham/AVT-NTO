@@ -1,3 +1,11 @@
+"""
+The entry point of a car side (executes on RaspberryPI):
+
+Setting up LAN client, sending frames to server (PC), then recieving
+corresponding command and sending it to the car's controller (Arduino)
+by serial port.
+"""
+
 import cv2
 from beholder2048squad.Client import Client
 import serial

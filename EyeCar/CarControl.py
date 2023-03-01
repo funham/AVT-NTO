@@ -1,8 +1,12 @@
+"""
+Car control script.
+
+Takes responsibility of handling detection results and calculating
+command to send to the car.
+"""
+
 from DetectionHandler import DetectionHandler
 from CarStatus import CarStatus
-
-# "friend" of Car status
-# Singleton
 
 
 class CarControl:
@@ -15,7 +19,14 @@ class CarControl:
         return cls.instance
 
     def get_command(self, detections: dict) -> str:
-        """ Returns a `Command` based on `detections` data """
+        """
+        Calculate command to send to the car, based on a detection results.
+
+        Applies all the handlers to the current car status and 
+        returns the command to send to the car. Then resets car's
+        status to be ready for the next cycle.
+        """
+
         for handler in self.handlers:
             handler.set_control(detections, self.status)
 
@@ -23,9 +34,10 @@ class CarControl:
         control_angle = round(self.status.angle)
 
         cmd = f'SPEED:{control_speed}\nANGLE:{control_angle}\n'
-        self.status.reset()  # reseting on each cycle
+        self.status.__reset()  # reseting on each cycle
 
         return cmd
 
     def register_handler(self, handler: DetectionHandler):
+        """Registers a handler to be called each cycle of detection handling"""
         self.handlers.append(handler)

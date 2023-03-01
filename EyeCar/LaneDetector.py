@@ -1,3 +1,10 @@
+"""
+Detector of a Lane.
+
+Extracts all the information about lane such as deviation of the course,
+tracking travelled distance, crossroad distance etc.  
+"""
+
 import cv2
 import numpy as np
 import cfg

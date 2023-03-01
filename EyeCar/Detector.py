@@ -1,3 +1,8 @@
+"""
+Defines basic detector interface and a global detection model 
+that unites all the basic detectors.
+"""
+
 from abc import ABC, abstractmethod
 import cv2
 
@@ -6,26 +11,6 @@ class IDetector(ABC):
     @abstractmethod
     def forward(self, frame: cv2.Mat) -> dict:
         pass
-
-
-class YoloV5Detector(IDetector):
-    def __init__(self, path):
-        self.model = ...
-
-    def forward(self, frame: cv2.Mat) -> dict:
-        detection = self.model(frame)
-        ...
-        return detection
-
-
-class YoloV8Detector(IDetector):
-    def __init__(self, path):
-        self.model = ...
-
-    def forward(self, frame: cv2.Mat) -> dict:
-        detection = self.model(frame)
-        ...
-        return detection
 
 
 class GlobalDetectionModel:

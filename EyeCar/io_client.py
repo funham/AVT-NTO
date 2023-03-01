@@ -1,3 +1,9 @@
+"""
+IOClient interface takes care of all the IO communication with the server
+such as reading frames from the camera and sending commands to a client.
+"""
+
+
 from enum import Enum
 from abc import ABC, abstractmethod
 from typing import Iterator
