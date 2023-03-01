@@ -17,7 +17,9 @@ while True:
 
     img[:] = [h, s, v]
     img = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
+    
     cv2.imshow('hsv_pallet', img)
+
     k = cv2.waitKey(1)
     if k == 27:
         break

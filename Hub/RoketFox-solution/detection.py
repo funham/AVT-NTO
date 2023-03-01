@@ -53,8 +53,12 @@ def find_weight_contours(img: cv2.Mat) -> Generator:
     '''
     contours = find_all_contours(img)
 
-    MIN_FACE_AREA = 5000
+    MIN_FACE_AREA = 20000
     contours = filter(lambda c: c.area > MIN_FACE_AREA, contours)
+
+    # for c in contours:
+    #     print(c.area)
+    
     contours: Iterable[FaceContour] = sorted(contours, key=lambda c: c.area)
 
     for c1, c2 in combinations(contours, 2):

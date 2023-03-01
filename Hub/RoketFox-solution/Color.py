@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 
 
 class Color:
@@ -15,9 +16,11 @@ class Color:
                     7: 130,  # 7 blue
                     8: 144}  # 8 violet
         # 9: 170} # 9 magenta
+        color = np.int32(color)
+
 
         h, s, v = color
-        if v < (255*0.5):  # most likely black
+        if v < (255*0.3):  # most likely black
             return 1
         elif s < (255*0.2) and v > (255*0.8):  # most likely white
             return 0

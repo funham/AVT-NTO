@@ -8,7 +8,7 @@ from Cargo import Cargo
 from Color import Color
 
 
-def preprocessing(img: cv2.Mat) -> np.ndarray:
+def get_flatten_view(img: cv2.Mat) -> cv2.Mat:
     '''
     Basic preprocessing of the image like crop, warp and resize.
     '''
@@ -26,32 +26,32 @@ def preprocessing(img: cv2.Mat) -> np.ndarray:
 
 
 def main():
-    cap = ImageCapture('res') if cfg.TESTING else cv2.VideoCapture(0)
+    cap = ImageCapture(cfg.TEST_IMGS) if cfg.TESTING else cv2.VideoCapture(0)
 
     while True:
         ret, frame = cap.read()
-
+        
         if not ret:
             print('\nError: Cannot read frame')
             break
 
-        frame = preprocessing(frame)
+        # frame = get_flatten_view(frame)
 
         if cfg.TESTING:
             cv2.imshow('frame', frame)
 
-        weights = Cargo.find_weights(frame)
+        weights: Iterable[Cargo] = Cargo.find_weights(frame)
 
         for i, cargo in enumerate(weights):
-            print("=======================")
-
             if cfg.TESTING:
-                cv2.imshow(f'n{i}', cargo.get_face())
-                print(f"{cargo.marking = }")
-                print(f"{cargo.coords = }")
+                print("=======================")
+                print(f"{cargo.marking.decoded = }")
+                print(f"{cargo.transform.position = }")
+                cv2.imshow(f'n{i}', cargo.get_face_view())
 
-            if cargo.marking == cfg.TARGET_MARKING:
-                send_to_drone(cargo.coords)
+            if cargo.marking == cfg.TARGET_MATRIX_MARKING:
+                send_to_drone(cargo.transform.position)
+                break
 
     print('Exiting main loop')
     cv2.destroyAllWindows()

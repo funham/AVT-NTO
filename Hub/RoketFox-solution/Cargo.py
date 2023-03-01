@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 from typing import *
-from Marking import Marking
+from Marking import MatrixMarking, StripesMarking
+from Coords import CargoPosition
 from detection import find_weight_contours
 
 
@@ -10,19 +11,10 @@ class Cargo:
         self.img = img
         self.cnt = cnt
         self.face_dims = (200, 200)  # dimensions of the output face
-        self.marking = Marking(self.get_face())
+        self.transform = CargoPosition(self.cnt)
+        self.marking = StripesMarking(self.get_face_view())
 
-    def __face_center(self) -> Tuple[int, int]:
-        bbox = cv2.minAreaRect(self.cnt)
-        center = bbox[0]
-        
-        return center
-
-    @property
-    def coords(self) -> Tuple:
-        return self.__face_center()
-
-    def get_face(self) -> cv2.Mat:
+    def get_face_view(self) -> cv2.Mat:
         width, height = self.face_dims
 
         rect = cv2.minAreaRect(self.cnt)
@@ -35,7 +27,7 @@ class Cargo:
         return face
 
     @staticmethod
-    def find_weights(img: cv2.Mat) -> Iterable:
+    def find_weights(img: cv2.Mat) -> Iterable[Self]:
         '''
         Find weights on the image
         '''

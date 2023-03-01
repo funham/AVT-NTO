@@ -1,6 +1,7 @@
 # from facility_api import *
 import numpy as np
 import config as cfg
+from Coords import CargoPosition
 
 
 def MoveToHoarder(hoarder: int):
@@ -19,19 +20,8 @@ def MoveToHoarder(hoarder: int):
         print("Moving to fourth hoarder")
 
 
-def __pix_to_coords(pix: np.ndarray) -> np.ndarray:
-    '''
-    Convert pixels to coordinates.
-    '''
-    x, y = pix
-    coord_w, coord_h = cfg.CARRIAGE_SIZE
-    img_w, img_h = cfg.IMG_SIZE
-
-    return (x/img_w*coord_w, y/img_h*coord_h)
-
-
-def send_to_drone(coords: np.ndarray) -> None:
-    coords = __pix_to_coords(coords)
+def send_to_drone(coords: tuple) -> None:
+    coords = CargoPosition.pix_to_coords(coords)
     # MoveTo(coords)
     # MagnetFullDown()
     # MagnetOn()
