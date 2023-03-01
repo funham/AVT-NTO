@@ -1,6 +1,6 @@
 from enum import Enum
 from abc import ABC, abstractmethod
-from typing import *
+from typing import Iterator
 
 import beholder2048squad.Server
 import cv2
@@ -51,17 +51,23 @@ class ImageFolderClient(IOClient):
         return next(self.reader)
 
     def handle_keyboard_input(self):
-        self.last_pressed_key = cv2.waitKey(0)
-
-        if self.last_pressed_key in (ord('q'), 27):
+        key = None
+        while key not in (27, ord('q'), ord('n'), ord('p')):
+            if key is not None:
+                print('Unknown key. Are you on ENG layout?')
+            key = cv2.waitKey(0)
+        
+        if key in (ord('q'), 27):
             raise StopIteration
+        
+        self.last_pressed_key = key
 
     def __reader(self) -> Iterator[cv2.Mat | None]:
         path_list = [path for path in os.listdir(
             self.path) if path.endswith('.png') or path.endswith('.jpg')]
 
         img_idx = 0
-        path = f'{self.path}\{path_list[img_idx]}'
+        path = f'{self.path}/{path_list[img_idx]}'
 
         yield cv2.imread(path)
 
@@ -74,7 +80,7 @@ class ImageFolderClient(IOClient):
 
             img_idx = img_idx % len(path_list)
 
-            path = f'{self.path}\{path_list[img_idx]}'
+            path = f'{self.path}/{path_list[img_idx]}'
             img = cv2.imread(path)
             yield img
 
