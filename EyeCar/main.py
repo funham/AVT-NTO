@@ -11,8 +11,9 @@ import cv2
 from io_client import get_io_client
 from CarControl import CarControl
 
-from Detector import GlobalDetectionModel, YoloV5Detector, YoloV8Detector
-from LaneKeeper import LaneDetector
+from Detector import GlobalDetectionModel
+from YoloDetector import YoloV5Detector, YoloV8Detector
+from LaneDetector import LaneDetector
 
 from DetectionHandler import LaneHandler
 
