@@ -39,3 +39,7 @@ VIDEO_SOURCE_PATH = r'C:\Users\fun1h\Documents\AVT-NTO\EyeCar\videos'
 VIDEO_SOURCE_FILE = 'FTL_full.mkv'
 IMG_SOURCE_FOLDER_PATH = r'C:\Users\fun1h\Documents\AVT-NTO\EyeCar\images'
 MODEL_FOLDER_PATH = r''
+
+# toffset, boffset, margin, height, bwidth, twidth, wscale
+# PERSPECTIVE_TRANSFORM_PARAMS = (0.13, 0.171, 0.1, 0.5, 0.4, 0.17, 2.0)
+PERSPECTIVE_TRANSFORM_PARAMS =  (-0.1, -0.1,   0.1, 0.7, 0.4, 0.1, 3.0)

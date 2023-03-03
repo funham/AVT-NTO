@@ -49,22 +49,27 @@ class LocalCameraClient(IOClient):
         return cv2.resize(frame, cfg.IMG_SHAPE) if ret else None
     
 class VideoPlayerClient(IOClient):
+    
     def __init__(self, path, fps):
-        self.cap = cv2.VideoCapture(path)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.IMG_W)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.IMG_H)
-
         self.path = path
         self.fps = fps
         self.paused = False
 
+        self._reset()
+
+    def _reset(self):
+        self.cap = cv2.VideoCapture(self.path)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.IMG_W)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.IMG_H)
+
     def read(self) -> cv2.Mat | None:
         super().read()
+
         ret, frame = self.cap.read()
         time.sleep(1/self.fps)
 
         if not ret:
-            self.cap = cv2.VideoCapture(self.path)
+            self._reset()
             ret, frame = self.cap.read()
 
         return cv2.resize(frame, cfg.IMG_SHAPE) if ret else None
@@ -80,7 +85,7 @@ class VideoPlayerClient(IOClient):
             raise StopIteration
 
         if key == ord('r'):
-            self.paused = False
+            self._reset()
 
 
 class ImageFolderClient(IOClient):

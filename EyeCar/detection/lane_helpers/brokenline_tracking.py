@@ -26,6 +26,8 @@ class BrokenLineTracker:
         bboxs = sorted(bboxs, key=lambda bbox: bbox[1], reverse=True)[:2]
         
         if len(bboxs) < 2:
+            if cfg.DEBUG:
+                cv2.imshow('broken line', layout[:, :w//2])
             return 0.0  # couldn't find two bounding boxes, so assume no change in distance.
         
         curr_segments = list(map(self.LayoutSegment, bboxs))
