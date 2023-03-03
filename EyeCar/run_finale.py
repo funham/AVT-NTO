@@ -39,7 +39,7 @@ def main_loop() -> None:
     frame = io_client.read()
 
     if frame is None:
-        return
+        raise StopIteration
 
     cv2.imshow('frame', frame)
 

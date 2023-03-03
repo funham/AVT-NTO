@@ -4,12 +4,13 @@ import numpy as np
 from io_client import InputType
 
 
-INPUT_MODE = InputType.IMAGE_FOLDER
+INPUT_MODE = InputType.VIDEO_PLAYER
 DEBUG = True
 
-IMG_W = 640
-IMG_H = 480
+IMG_W = 350
+IMG_H = 200
 IMG_SHAPE = (IMG_W, IMG_H)
+FPS = 60
 
 CAR_MAX_ANGLE: float = 45
 CAR_MAX_SPEED: int = 255
@@ -34,5 +35,7 @@ UDP_PORT = 5000
 TCP_HOST = "192.168.17.46"
 TCP_PORT = 5001
 
+VIDEO_SOURCE_PATH = r'C:\Users\fun1h\Documents\AVT-NTO\EyeCar\videos'
+VIDEO_SOURCE_FILE = 'FTL_full.mkv'
 IMG_SOURCE_FOLDER_PATH = r'C:\Users\fun1h\Documents\AVT-NTO\EyeCar\images'
 MODEL_FOLDER_PATH = r''

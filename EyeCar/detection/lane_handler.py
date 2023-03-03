@@ -16,7 +16,7 @@ class LaneTurnHandler(DetectionHandler):
         try:
             det = self.DetectionParser(detections)
         except KeyError:
-            return print("key not found")
+            return print("[LaneTurnHandler]: key not found")
 
         k_dev = cfg.CAR_MAX_ANGLE / cfg.MAX_DEVIATION
         

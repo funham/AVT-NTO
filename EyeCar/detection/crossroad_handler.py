@@ -17,7 +17,7 @@ class CrossroadHandler(DetectionHandler):
         try:
             det = self.DetectionParser(detections)
         except KeyError:
-            return print("key not found")
+            return print("[CrossroadHandler]: key not found")
 
         # if we are at crossroad zone
         if det.crossroad_dist < cfg.CROSSROAD_STOP_DIST:

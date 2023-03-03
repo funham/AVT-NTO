@@ -49,7 +49,7 @@ class CarStatus:
     @speed.setter
     def speed(self, val):
         self._set_speed_vals.append(
-            np.clip(val, cfg.CAR_MIN_SPEED, cfg.CAR_MIN_SPEED))
+            np.clip(val, cfg.CAR_MIN_SPEED, cfg.CAR_MAX_SPEED))
 
     @property
     def suspended(self) -> bool:

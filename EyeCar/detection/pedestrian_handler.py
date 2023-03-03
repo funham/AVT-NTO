@@ -16,7 +16,7 @@ class PedestrianHandler(DetectionHandler):
         try:
             det = self.DetectionParser(detections)
         except:
-            return print("key not found")
+            return print("[PedestrianHandler]: key not found")
 
         distances = [p['distance'] for p in det.pedestrians]
         min_dist = min(distances)

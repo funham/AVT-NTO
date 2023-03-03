@@ -8,6 +8,7 @@ from enum import Enum
 from abc import ABC, abstractmethod
 from typing import Iterator
 
+import time
 import beholder2048squad.Server
 import cv2
 import os
@@ -18,6 +19,7 @@ class InputType(Enum):
     LOCAL_CAMERA = 0
     IMAGE_FOLDER = 1
     SERVER_CAMERA = 2
+    VIDEO_PLAYER = 3
 
 
 class IOClient(ABC):
@@ -37,14 +39,48 @@ class IOClient(ABC):
 class LocalCameraClient(IOClient):
     def __init__(self):
         self.cap = cv2.VideoCapture(0)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.IMG_W)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.IMG_W)
 
     def read(self) -> cv2.Mat | None:
         super().read()
         ret, frame = self.cap.read()
 
-        return frame if ret else None
+        return cv2.resize(frame, cfg.IMG_SHAPE) if ret else None
+    
+class VideoPlayerClient(IOClient):
+    def __init__(self, path, fps):
+        self.cap = cv2.VideoCapture(path)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.IMG_W)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.IMG_H)
+
+        self.path = path
+        self.fps = fps
+        self.paused = False
+
+    def read(self) -> cv2.Mat | None:
+        super().read()
+        ret, frame = self.cap.read()
+        time.sleep(1/self.fps)
+
+        if not ret:
+            self.cap = cv2.VideoCapture(self.path)
+            ret, frame = self.cap.read()
+
+        return cv2.resize(frame, cfg.IMG_SHAPE) if ret else None
+    
+    def handle_keyboard_input(self):
+        key = cv2.waitKey(1)
+        
+        if key == ord('p'):
+            self.paused = not self.paused
+            key = cv2.waitKey(0)
+        
+        if key in (27, ord('q')):
+            raise StopIteration
+
+        if key == ord('r'):
+            self.paused = False
 
 
 class ImageFolderClient(IOClient):
@@ -75,7 +111,7 @@ class ImageFolderClient(IOClient):
         img_idx = 0
         path = f'{self.path}/{path_list[img_idx]}'
 
-        yield cv2.imread(path)
+        yield cv2.resize(cv2.imread(path), cfg.IMG_SHAPE)
 
         while True:
             if self.last_pressed_key == ord('n'):
@@ -88,7 +124,8 @@ class ImageFolderClient(IOClient):
 
             path = f'{self.path}/{path_list[img_idx]}'
             img = cv2.imread(path)
-            yield img
+
+            yield cv2.resize(img, cfg.IMG_SHAPE)
 
 
 class ServerCameraClient(IOClient):
@@ -102,7 +139,7 @@ class ServerCameraClient(IOClient):
 
     def read(self) -> cv2.Mat | None:
         super().read()
-        return self._server.recv_img()
+        return cv2.resize(self._server.recv_img(), cfg.IMG_SHAPE)
 
     def send_msg(self, command: str) -> None:
         super().send_msg(command)
@@ -117,5 +154,7 @@ def get_io_client(in_mode) -> IOClient:
     elif in_mode == InputType.SERVER_CAMERA:
         return ServerCameraClient(udp_host=cfg.UDP_HOST, udp_port=cfg.UDP_PORT,
                                   tcp_host=cfg.TCP_HOST, tcp_port=cfg.TCP_PORT)
+    elif in_mode == InputType.VIDEO_PLAYER:
+        return VideoPlayerClient(path=f'{cfg.VIDEO_SOURCE_PATH}/{cfg.VIDEO_SOURCE_FILE}', fps=cfg.FPS)
 
     raise ValueError('Invalid input mode')
