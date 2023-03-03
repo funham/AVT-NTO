@@ -5,8 +5,8 @@ Takes responsibility of handling detection results and calculating
 command to send to the car.
 """
 
-from DetectionHandler import DetectionHandler
-from CarStatus import CarStatus
+from detection.detection_handler import DetectionHandler
+from car_status import CarStatus
 
 
 class CarControl:
@@ -34,7 +34,7 @@ class CarControl:
         control_angle = round(self.status.angle)
 
         cmd = f'SPEED:{control_speed}\nANGLE:{control_angle}\n'
-        self.status.__reset()  # reseting on each cycle
+        self.status.reset()  # reseting on each cycle
 
         return cmd
 

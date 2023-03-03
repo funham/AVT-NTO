@@ -1,7 +1,8 @@
+"""A script to test recieving image from a camera installed on a car"""
+
 import cv2
 import cfg
 
-from typing import *
 from beholder2048squad.Server import Server
 
 
@@ -16,7 +17,8 @@ def main_loop() -> None:
     if cv2.waitKey(1) == ord('q') or frame is None:
         raise StopIteration
 
-    serv.send_msg('SPEED:0')
+    serv.send_msg('SPEED:0\n')
+
 
 if __name__ == '__main__':
     try:
@@ -25,6 +27,3 @@ if __name__ == '__main__':
 
     except StopIteration:
         print('Exiting main loop...')
-
-    finally:
-        print('Dont get hit by a car')

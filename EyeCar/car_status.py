@@ -9,10 +9,11 @@ import numpy as np
 import time
 
 from enum import Enum
+from typing import Callable, Optional
 
 
 class CarStatus:
-    class IntersectionPassDirections(Enum):
+    class IntersectionTurnDirections(Enum):
         LEFT = 1
         RIGHT = 2
         STRAIGHT = 3
@@ -23,8 +24,12 @@ class CarStatus:
     _set_speed_vals: list[float] = []
     _last_stop_time: float = 0
     _requested_stop: bool = False
+    _turning_dir: IntersectionTurnDirections | None = None
 
-    def __reset(self):
+    def __init__(self) -> None:
+        self.reset()
+
+    def reset(self):
         self._requested_stop = False
         self._set_speed_vals.clear()
         self.speed = cfg.CAR_MAX_SPEED
@@ -70,17 +75,24 @@ class CarStatus:
         self._suspended = True
         self._requested_stop = True
 
-    # TODO
-    def set_intersection_passing(self, dir: IntersectionPassDirections):
-        """Sets the car into the intersection passing mode"""
-        ...
+    @property
+    def turning(self) -> IntersectionTurnDirections | None:
+        return self._turning_dir
 
-    # TODO
-    def terminate_ride(self):
+    def intersection_turn(self, dir: IntersectionTurnDirections):
+        """Sets the car into the intersection passing mode"""
+        self._turning_dir = dir
+
+    def terminate_ride(self, callback: Optional[Callable] = None, *args, **kwargs):
         """
         Terminates ride when all the tasks of a run are done.
 
         For e.g. when the car has delivered the cargo to the sorting station
         or ran the requested distance, specified in cfg file.
         """
-        ...
+        print("Ride termination requested")
+
+        if callback is not None:
+            callback(*args, **kwargs)
+
+        raise StopIteration

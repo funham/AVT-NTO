@@ -8,7 +8,7 @@ tracking travelled distance, crossroad distance etc.
 import cv2
 import numpy as np
 import cfg
-from Detector import IDetector
+from detection.detection import IDetector
 
 
 class LaneDetector(IDetector):

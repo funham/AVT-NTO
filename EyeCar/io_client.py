@@ -13,11 +13,11 @@ import cv2
 import os
 import cfg
 
+
 class InputType(Enum):
     LOCAL_CAMERA = 0
     IMAGE_FOLDER = 1
     SERVER_CAMERA = 2
-
 
 
 class IOClient(ABC):
@@ -39,13 +39,13 @@ class LocalCameraClient(IOClient):
         self.cap = cv2.VideoCapture(0)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-    
+
     def read(self) -> cv2.Mat | None:
         super().read()
         ret, frame = self.cap.read()
-    
+
         return frame if ret else None
-    
+
 
 class ImageFolderClient(IOClient):
     def __init__(self, path):
@@ -62,10 +62,10 @@ class ImageFolderClient(IOClient):
             if key is not None:
                 print('Unknown key. Are you on ENG layout?')
             key = cv2.waitKey(0)
-        
+
         if key in (ord('q'), 27):
             raise StopIteration
-        
+
         self.last_pressed_key = key
 
     def __reader(self) -> Iterator[cv2.Mat | None]:
@@ -93,16 +93,17 @@ class ImageFolderClient(IOClient):
 
 class ServerCameraClient(IOClient):
     def __init__(self, udp_host: str,
-                       udp_port: int,
-                       tcp_host: str,
-                       tcp_port: int):
-        
-        self._server = beholder2048squad.Server.Server(udp_host, udp_port, tcp_host, tcp_port)
+                 udp_port: int,
+                 tcp_host: str,
+                 tcp_port: int):
+
+        self._server = beholder2048squad.Server.Server(
+            udp_host, udp_port, tcp_host, tcp_port)
 
     def read(self) -> cv2.Mat | None:
         super().read()
         return self._server.recv_img()
-    
+
     def send_msg(self, command: str) -> None:
         super().send_msg(command)
         self._server.send_msg(command)
@@ -116,5 +117,5 @@ def get_io_client(in_mode) -> IOClient:
     elif in_mode == InputType.SERVER_CAMERA:
         return ServerCameraClient(udp_host=cfg.UDP_HOST, udp_port=cfg.UDP_PORT,
                                   tcp_host=cfg.TCP_HOST, tcp_port=cfg.TCP_PORT)
-    
+
     raise ValueError('Invalid input mode')

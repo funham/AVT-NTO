@@ -1,3 +1,5 @@
+"""Config file of this project"""
+
 import numpy as np
 from io_client import InputType
 
@@ -15,7 +17,6 @@ CAR_MIN_SPEED: int = 100
 MAX_DEVIATION: float = 1
 PIXEL_TO_CM_RATIO: float = 0.05
 
-TARGET_DISTANCE = np.inf
 CROSSROAD_STOP_DIST: float = 6.5
 CROSSROAD_SLOW_DOWN_DIST: float = 15
 CROSSROAD_STOP_TIME: float = 1.0
