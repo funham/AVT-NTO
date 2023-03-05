@@ -6,7 +6,7 @@ command to send to the car.
 """
 
 from detection.detection_handler import DetectionHandler
-from car_status import CarStatus
+from include.car_status import CarStatus
 
 
 class CarControl:

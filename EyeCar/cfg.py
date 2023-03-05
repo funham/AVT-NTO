@@ -1,7 +1,7 @@
 """Config file of this project"""
 
 import numpy as np
-from io_client import InputType
+from include.io_client import InputType
 
 
 INPUT_MODE = InputType.VIDEO_PLAYER
@@ -35,10 +35,10 @@ UDP_PORT = 5000
 TCP_HOST = "192.168.17.46"
 TCP_PORT = 5001
 
-VIDEO_SOURCE_PATH = r'C:\Users\fun1h\Documents\AVT-NTO\EyeCar\videos'
+VIDEO_SOURCE_PATH = 'EyeCar/res/videos'
 VIDEO_SOURCE_FILE = 'FTL_full.mkv'
-IMG_SOURCE_FOLDER_PATH = r'C:\Users\fun1h\Documents\AVT-NTO\EyeCar\images'
-MODEL_FOLDER_PATH = r''
+IMG_SOURCE_FOLDER_PATH = 'EyeCar/res/images'
+MODEL_FOLDER_PATH = ''
 
 # toffset, boffset, margin, height, bwidth, twidth, wscale
 # PERSPECTIVE_TRANSFORM_PARAMS = (0.13, 0.171, 0.1, 0.5, 0.4, 0.17, 2.0)

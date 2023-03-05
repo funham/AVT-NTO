@@ -49,7 +49,6 @@ class LocalCameraClient(IOClient):
         return cv2.resize(frame, cfg.IMG_SHAPE) if ret else None
     
 class VideoPlayerClient(IOClient):
-    
     def __init__(self, path, fps):
         self.path = path
         self.fps = fps

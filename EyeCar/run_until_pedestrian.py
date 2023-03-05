@@ -6,18 +6,18 @@ import cfg
 import cv2
 
 # IO and controls imports
-import io_client as io_client_manager
-from car_control import CarControl
+import include.io_client as io_client_manager
+from include.car_control import CarControl
 
 # Detector imports
 from detection.detection import GlobalDetectionModel
-from detection.yolo_detector import YoloV5Detector, YoloV8Detector
-from detection.lane_detector import LaneDetector
+from detection.detectors.yolo_detector import YoloV5Detector, YoloV8Detector
+from detection.detectors.lane_detector import LaneDetector
 
 # Handler imports
-from detection.lane_handler import LaneTurnHandler
-from detection.crossroad_handler import CrossroadHandler
-from detection.pedestrian_handler import PedestrianHandler
+from detection.handlers.lane_handler import LaneTurnHandler
+from detection.handlers.crossroad_handler import CrossroadHandler
+from detection.handlers.pedestrian_handler import PedestrianHandler
 
 # Global variables
 io_client = io_client_manager.create_io_client(cfg.INPUT_MODE)

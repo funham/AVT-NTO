@@ -1,7 +1,7 @@
 """Defines a detection handler interface and its implementations."""
 
 from abc import ABC, abstractmethod
-from car_status import CarStatus
+from include.car_status import CarStatus
 
 
 class DetectionHandler(ABC):

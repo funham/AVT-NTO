@@ -6,8 +6,8 @@ import cfg
 import cv2
 
 # IO and controls imports
-import io_client as io_client_manager
-from car_control import CarControl
+import include.io_client as io_client_manager
+from include.car_control import CarControl
 
 # Detector imports
 from detection.detection import GlobalDetectionModel

@@ -6,18 +6,18 @@ import cfg
 import cv2
 
 # IO and controls imports
-import io_client as io_client_manager
-from car_control import CarControl
+import include.io_client as io_client_manager
+from include.car_control import CarControl
 
 # Detector imports
 from detection.detection import GlobalDetectionModel
-from detection.lane_detector import LaneDetector
+from detection.detectors.lane_detector import LaneDetector
 
 # Handler imports
-from detection.lane_handler import LaneTurnHandler
-from detection.lane_handler import OpticalDistanceHandler
-from detection.timing_handler import TimingDistanceHandler
-from detection.timing_handler import TimingHandler
+from detection.handlers.lane_handler import LaneTurnHandler
+from detection.handlers.lane_handler import OpticalDistanceHandler
+from detection.handlers.timing_handler import TimingDistanceHandler
+from detection.handlers.timing_handler import TimingHandler
 
 
 TARGET_DISTANCE = 300  # 3m

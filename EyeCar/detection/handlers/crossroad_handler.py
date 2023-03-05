@@ -1,5 +1,5 @@
 import cfg
-from car_status import CarStatus
+from include.car_status import CarStatus
 
 from detection.detection_handler import DetectionHandler
 

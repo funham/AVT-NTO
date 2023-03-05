@@ -6,20 +6,20 @@ import cfg
 import cv2
 
 # IO and controls imports
-import io_client as io_client_manager
-from car_control import CarControl
+import include.io_client as io_client_manager
+from include.car_control import CarControl
 
 # Detector imports
 from detection.detection import GlobalDetectionModel
-from detection.lane_detector import LaneDetector
-from detection.yolo_detector import YoloV5Detector
+from detection.detectors.lane_detector import LaneDetector
+from detection.detectors.yolo_detector import YoloV5Detector
 
 # Handler imports
-from detection.lane_handler import LaneTurnHandler
-from detection.lane_handler import OpticalDistanceHandler
-from detection.timing_handler import TimingDistanceHandler
-from detection.timing_handler import TimingHandler
-from detection.trafficlight_handler import TrafficLightHandler
+from detection.handlers.lane_handler import LaneTurnHandler
+from detection.handlers.lane_handler import OpticalDistanceHandler
+from detection.handlers.timing_handler import TimingDistanceHandler
+from detection.handlers.timing_handler import TimingHandler
+from detection.handlers.trafficlight_handler import TrafficLightHandler
 
 
 TARGET_DISTANCE = 400  # 4m
