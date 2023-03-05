@@ -133,3 +133,6 @@ dmypy.json
 
 # Custom modules
 beholder2048squad/
+.idea/
+EyeCar-server/.idea/
+EyeCar-client/.idea/
