@@ -35,9 +35,9 @@ UDP_PORT = 5000
 TCP_HOST = "192.168.17.46"
 TCP_PORT = 5001
 
-VIDEO_SOURCE_PATH = 'EyeCar/res/videos'
+VIDEO_SOURCE_PATH = 'EyeCar-server/res/videos'
 VIDEO_SOURCE_FILE = 'FTL_full.mkv'
-IMG_SOURCE_FOLDER_PATH = 'EyeCar/res/images'
+IMG_SOURCE_FOLDER_PATH = 'EyeCar-server/res/images'
 MODEL_FOLDER_PATH = ''
 
 # toffset, boffset, margin, height, bwidth, twidth, wscale
