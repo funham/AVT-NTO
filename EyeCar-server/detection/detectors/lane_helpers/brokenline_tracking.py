@@ -18,6 +18,8 @@ class BrokenLineTracker:
         self._prev_segments: list[self.LayoutSegment] = []
 
     def get_distance_travelled(self, layout: cv2.Mat) -> float:
+        assert len(layout.shape) == 2
+
         h, w = layout.shape
         broken_line_image = layout[:, :w//2]
 

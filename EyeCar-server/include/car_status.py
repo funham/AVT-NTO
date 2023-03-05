@@ -13,10 +13,7 @@ from typing import Callable, Optional
 
 
 class CarStatus:
-    class IntersectionTurnDirections(Enum):
-        LEFT = 1
-        RIGHT = 2
-        STRAIGHT = 3
+    
 
     _angle: float = 0
     _suspended: bool = False
@@ -24,7 +21,6 @@ class CarStatus:
     _set_speed_vals: list[float] = []
     _last_stop_time: float = 0
     _requested_stop: bool = False
-    _turning_dir: IntersectionTurnDirections | None = None
 
     def __init__(self) -> None:
         self.reset()
@@ -74,14 +70,6 @@ class CarStatus:
         self._last_stop_time = time.time()
         self._suspended = True
         self._requested_stop = True
-
-    @property
-    def turning(self) -> IntersectionTurnDirections | None:
-        return self._turning_dir
-
-    def intersection_turn(self, dir: IntersectionTurnDirections):
-        """Sets the car into the intersection passing mode"""
-        self._turning_dir = dir
 
     def terminate_ride(self, callback: Optional[Callable] = None, *args, **kwargs):
         """

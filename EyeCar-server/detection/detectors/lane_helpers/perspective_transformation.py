@@ -34,10 +34,10 @@ class PerspectiveTransformation:
         self.in_w, self.in_h = in_size[:2]
         self.out_w, self.out_h = out_size[:2]
 
-        self.tl = (self.in_w // 2 * (1 + toffset - twidth * wscale), self.in_h * (1 - margin - height))  # top left
-        self.bl = (self.in_w // 2 * (1 + boffset - bwidth * wscale), self.in_h * (1 - margin))           # bottom left
-        self.tr = (self.tl[0] + self.in_w * twidth * wscale, self.tl[1])  # top right
-        self.br = (self.bl[0] + self.in_w * bwidth * wscale, self.bl[1])  # bottom right
+        self.tl = np.array((self.in_w // 2 * (1 + toffset - twidth * wscale), self.in_h * (1 - margin - height)))  # top left
+        self.bl = np.array((self.in_w // 2 * (1 + boffset - bwidth * wscale), self.in_h * (1 - margin)))           # bottom left
+        self.tr = np.array((self.tl[0] + self.in_w * twidth * wscale, self.tl[1]))  # top right
+        self.br = np.array((self.bl[0] + self.in_w * bwidth * wscale, self.bl[1]))  # bottom right
 
         self.input_pts = np.float32([self.bl, self.tl, self.tr, self.br])
         self.output_pts = np.float32(
@@ -52,10 +52,9 @@ class PerspectiveTransformation:
         transformed = cv2.warpPerspective(frame, self.M, (self.out_w, self.out_h), flags=cv2.INTER_LINEAR)
         
         if cfg.DEBUG:
-            p_mid_top = np.int32(((self.tl[0] + self.tr[0]) // 2, self.tl[1]))
-            p_mid_bottom = np.int32(((self.bl[0] + self.br[0]) // 2, self.bl[1]))
-            lpts = self.input_pts.reshape((-1, 1, 2)).astype(np.int32)
-            lines = cv2.polylines(frame, [lpts],
+            p_mid_top = np.int32((self.tl + self.tr) / 2)
+            p_mid_bottom = np.int32((self.bl + self.br) / 2)
+            lines = cv2.polylines(frame, [np.int32(self.input_pts)],
                                   True, (255, 0, 0), 2, cv2.LINE_AA)
             lines = cv2.line(lines, p_mid_bottom, p_mid_top, (0, 0, 255), 1, cv2.LINE_AA)
             cv2.imshow('lines', lines)

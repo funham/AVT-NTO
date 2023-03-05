@@ -24,7 +24,7 @@ from detection.handlers.lane_handler import LaneTurnHandler
 from detection.handlers.lane_handler import OpticalDistanceHandler
 from detection.handlers.timing_handler import TimingDistanceHandler
 from detection.handlers.timing_handler import TimingHandler
-from detection.handlers.trafficlight_handler import TrafficLightHandler
+from detection.handlers.crossroad_handler import CrossroadTurnHandler
 
 
 TARGET_DISTANCE = np.inf  # No objective on travelling distance
@@ -42,6 +42,8 @@ detector.add_detector(LaneDetector())
 
 # Registering handlers to detections
 control.register_handler(LaneTurnHandler())
+control.register_handler(CrossroadTurnHandler([CrossroadTurnHandler.Directions.RIGHT,
+                                               CrossroadTurnHandler.Directions.RIGHT]))
 
 # Optical distance controlling (potentially the most stable)
 control.register_handler(OpticalDistanceHandler(target_distance=TARGET_DISTANCE))
