@@ -2,6 +2,7 @@
 Testing algorithms related to lane detection
 """
 
+import os
 import cfg
 import cv2
 import numpy as np
@@ -46,13 +47,16 @@ control.register_handler(CrossroadTurnHandler([CrossroadTurnHandler.Directions.R
                                                CrossroadTurnHandler.Directions.RIGHT]))
 
 # Optical distance controlling (potentially the most stable)
-control.register_handler(OpticalDistanceHandler(target_distance=TARGET_DISTANCE))
+control.register_handler(OpticalDistanceHandler(target_distance=TARGET_DISTANCE, 
+                                                on_distance_travelled=lambda:...))
 
 # Control distance by time directly (works properly only if speed is constant)
-control.register_handler(TimingHandler(target_time=TARGET_DISTANCE / cfg.CAR_MAX_SPEED))
+control.register_handler(TimingHandler(target_time=TARGET_DISTANCE / cfg.CAR_MAX_SPEED, 
+                                       on_time_passed=lambda:...))
 
 # Control distance by time with variable speed
-control.register_handler(TimingDistanceHandler(target_distance=TARGET_DISTANCE))
+control.register_handler(TimingDistanceHandler(target_distance=TARGET_DISTANCE, 
+                                               on_distance_travelled=lambda:...))
 
 
 def main_loop() -> None:
@@ -62,6 +66,11 @@ def main_loop() -> None:
         return
 
     cv2.imshow('frame', frame)
+    
+    if os.name == 'nt':
+        os.system('cls')
+    else:
+        os.system('clear')
 
     detections = detector.forward(frame)
     cmd = control.get_command(detections)

@@ -11,6 +11,9 @@ class Thresholder:
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         layout = cv2.inRange(hsv, (0, 0, 240), (180, 150, 255))
 
+        layout = cv2.erode(layout, None, iterations=2)
+        layout = cv2.dilate(layout, None, iterations=2)
+
         if cfg.DEBUG:
             cv2.imshow('layout', layout)
 

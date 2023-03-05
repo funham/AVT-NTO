@@ -27,7 +27,7 @@ class IOClient(ABC):
         print('-----------------')
 
     def send_msg(self, command: str) -> None:
-        print(f'\nSending command:\n{command}')
+        print(f'Sending command:\n{command}')
 
     def handle_keyboard_input(self):
         key = cv2.waitKey(1)
