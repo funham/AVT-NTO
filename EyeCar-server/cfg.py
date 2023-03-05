@@ -35,10 +35,10 @@ UDP_PORT = 5000
 TCP_HOST = "192.168.17.46"
 TCP_PORT = 5001
 
-VIDEO_SOURCE_PATH = 'EyeCar-server/res/videos'
-VIDEO_SOURCE_FILE = 'FTL_full.mkv'
-IMG_SOURCE_FOLDER_PATH = 'EyeCar-server/res/images'
-MODEL_FOLDER_PATH = ''
+DEFAULT_VIDEO_SOURCE_PATH = 'EyeCar-server/res/videos'
+DEFAULT_VIDEO_SOURCE_FILE = 'FTL_full.mkv'
+DEFAULT_IMG_SOURCE_FOLDER_PATH = 'EyeCar-server/res/images'
+DEFAULT_MODEL_FOLDER = ''
 
 # toffset, boffset, margin, height, bwidth, twidth, wscale
 # PERSPECTIVE_TRANSFORM_PARAMS = (0.13, 0.171, 0.1, 0.5, 0.4, 0.17, 2.0)

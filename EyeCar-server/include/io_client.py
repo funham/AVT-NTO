@@ -150,15 +150,15 @@ class ServerCameraClient(IOClient):
         self._server.send_msg(command)
 
 
-def create_io_client(in_mode) -> IOClient:
+def create_io_client(in_mode, args) -> IOClient:
     if in_mode == InputType.LOCAL_CAMERA:
         return LocalCameraClient()
     elif in_mode == InputType.IMAGE_FOLDER:
-        return ImageFolderClient(path=cfg.IMG_SOURCE_FOLDER_PATH)
+        return ImageFolderClient(path=args.img_source_folder_path)
     elif in_mode == InputType.SERVER_CAMERA:
         return ServerCameraClient(udp_host=cfg.UDP_HOST, udp_port=cfg.UDP_PORT,
                                   tcp_host=cfg.TCP_HOST, tcp_port=cfg.TCP_PORT)
     elif in_mode == InputType.VIDEO_PLAYER:
-        return VideoPlayerClient(path=f'{cfg.VIDEO_SOURCE_PATH}/{cfg.VIDEO_SOURCE_FILE}', fps=cfg.FPS)
+        return VideoPlayerClient(path=os.path.join(args.video_source_path, args.video_source_file), fps=cfg.FPS)
 
     raise ValueError('Invalid input mode')

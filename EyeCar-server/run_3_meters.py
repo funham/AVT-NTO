@@ -5,6 +5,10 @@ Run 3 meters subtask
 import cfg
 import cv2
 
+# Args
+import argparse
+from args import get_args_parser
+
 # IO and controls imports
 import include.io_client as io_client_manager
 from include.car_control import CarControl
@@ -22,8 +26,11 @@ from detection.handlers.timing_handler import TimingHandler
 
 TARGET_DISTANCE = 300  # 3m
 
+parser = argparse.ArgumentParser(parents=[get_args_parser()])
+args = parser.parse_args()
+
 # Global variables
-io_client = io_client_manager.create_io_client(cfg.INPUT_MODE)
+io_client = io_client_manager.create_io_client(cfg.INPUT_MODE, args)
 detector = GlobalDetectionModel()
 control = CarControl()
 
