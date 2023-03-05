@@ -20,7 +20,7 @@ from detection.crossroad_handler import CrossroadHandler
 from detection.pedestrian_handler import PedestrianHandler
 
 # Global variables
-io_client = io_client_manager.get_io_client(cfg.INPUT_MODE)
+io_client = io_client_manager.create_io_client(cfg.INPUT_MODE)
 detector = GlobalDetectionModel()
 control = CarControl()
 
@@ -34,7 +34,7 @@ control.register_handler(PedestrianHandler())
 
 
 def main_loop() -> None:
-    frame = io_client.read()
+    frame = io_client.read_frame()
 
     if frame is None:
         return

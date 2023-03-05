@@ -9,11 +9,11 @@ import cv2
 import cfg
 from detection.detection import IDetector
 
-from detection.lane_helpers.brokenline_tracking import BrokenLineTracker
-from detection.lane_helpers.perspective_transformation import PerspectiveTransformation
-from detection.lane_helpers.thresholding import Thresholder
-from detection.lane_helpers.stopline import StoplineDetector
-from detection.lane_helpers.curvature import LineCurvature
+from detection.detectors.lane_helpers.brokenline_tracking import BrokenLineTracker
+from detection.detectors.lane_helpers.perspective_transformation import PerspectiveTransformation
+from detection.detectors.lane_helpers.thresholding import Thresholder
+from detection.detectors.lane_helpers.stopline import StoplineDetector
+from detection.detectors.lane_helpers.curvature import LineCurvature
 
 
 class LaneDetector(IDetector):

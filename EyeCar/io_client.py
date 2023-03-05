@@ -23,7 +23,7 @@ class InputType(Enum):
 
 
 class IOClient(ABC):
-    def read(self) -> cv2.Mat | None:
+    def read_frame(self) -> cv2.Mat | None:
         print('-----------------')
 
     def send_msg(self, command: str) -> None:
@@ -42,8 +42,8 @@ class LocalCameraClient(IOClient):
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.IMG_W)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.IMG_W)
 
-    def read(self) -> cv2.Mat | None:
-        super().read()
+    def read_frame(self) -> cv2.Mat | None:
+        super().read_frame()
         ret, frame = self.cap.read()
 
         return cv2.resize(frame, cfg.IMG_SHAPE) if ret else None
@@ -62,8 +62,8 @@ class VideoPlayerClient(IOClient):
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.IMG_W)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.IMG_H)
 
-    def read(self) -> cv2.Mat | None:
-        super().read()
+    def read_frame(self) -> cv2.Mat | None:
+        super().read_frame()
 
         ret, frame = self.cap.read()
         time.sleep(1/self.fps)
@@ -93,8 +93,8 @@ class ImageFolderClient(IOClient):
         self.path = path
         self.reader = self.__reader()
 
-    def read(self) -> cv2.Mat | None:
-        super().read()
+    def read_frame(self) -> cv2.Mat | None:
+        super().read_frame()
         return next(self.reader)
 
     def handle_keyboard_input(self):
@@ -142,8 +142,8 @@ class ServerCameraClient(IOClient):
         self._server = beholder2048squad.Server.Server(
             udp_host, udp_port, tcp_host, tcp_port)
 
-    def read(self) -> cv2.Mat | None:
-        super().read()
+    def read_frame(self) -> cv2.Mat | None:
+        super().read_frame()
         return cv2.resize(self._server.recv_img(), cfg.IMG_SHAPE)
 
     def send_msg(self, command: str) -> None:
@@ -151,7 +151,7 @@ class ServerCameraClient(IOClient):
         self._server.send_msg(command)
 
 
-def get_io_client(in_mode) -> IOClient:
+def create_io_client(in_mode) -> IOClient:
     if in_mode == InputType.LOCAL_CAMERA:
         return LocalCameraClient()
     elif in_mode == InputType.IMAGE_FOLDER:

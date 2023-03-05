@@ -23,7 +23,7 @@ from detection.timing_handler import TimingHandler
 TARGET_DISTANCE = 300  # 3m
 
 # Global variables
-io_client = io_client_manager.get_io_client(cfg.INPUT_MODE)
+io_client = io_client_manager.create_io_client(cfg.INPUT_MODE)
 detector = GlobalDetectionModel()
 control = CarControl()
 
@@ -44,7 +44,7 @@ control.register_handler(TimingDistanceHandler(target_distance=TARGET_DISTANCE))
 
 
 def main_loop() -> None:
-    frame = io_client.read()
+    frame = io_client.read_frame()
 
     if frame is None:
         return

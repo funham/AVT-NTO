@@ -1,5 +1,5 @@
 """
-Final run task
+Run 3 meters subtask
 """
 
 import cfg
@@ -11,13 +11,11 @@ from car_control import CarControl
 
 # Detector imports
 from detection.detection import GlobalDetectionModel
-from detection.detectors.yolo_detector import YoloV5Detector, YoloV8Detector
-from detection.detectors.lane_detector import LaneDetector
+from detection.detectors.yolo_detector import YoloV8Detector
 
 # Handler imports
-from detection.handlers.lane_handler import LaneTurnHandler
-from detection.handlers.crossroad_handler import CrossroadHandler
-from detection.handlers.pedestrian_handler import PedestrianHandler
+from detection.handlers.trafficlight_handler import TrafficLightStaticHandler
+
 
 # Global variables
 io_client = io_client_manager.create_io_client(cfg.INPUT_MODE)
@@ -25,21 +23,16 @@ detector = GlobalDetectionModel()
 control = CarControl()
 
 # Adding detectors to the global detector object.
-detector.add_detector(YoloV5Detector("/Models/TrafficLightsDetector.model"))
-detector.add_detector(YoloV8Detector("/Models/SignPedestrianDetector.model"))
-detector.add_detector(LaneDetector())
+detector.add_detector(YoloV8Detector("/Models/TrafficLightsDetector"))
 
 # Registering handlers to detections
-control.register_handler(LaneTurnHandler())
-control.register_handler(PedestrianHandler())
-control.register_handler(CrossroadHandler([]))
-
+control.register_handler(TrafficLightStaticHandler())
 
 def main_loop() -> None:
     frame = io_client.read_frame()
 
     if frame is None:
-        raise StopIteration
+        return
 
     cv2.imshow('frame', frame)
 
