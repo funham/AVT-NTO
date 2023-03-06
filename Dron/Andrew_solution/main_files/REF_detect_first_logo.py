@@ -114,7 +114,7 @@ def getVideo(data):
 
 board = BoardManager()  # создаем объект бортового менеджера
 ap = FlightController(callback)  # создаем объект управления полета
-cargo = CargoController()
+cargo = CargoController() # создаем объект управления магнитного захвата
 
 once = False  # переменная отвечающая за первое вхождение в начало программы
 
