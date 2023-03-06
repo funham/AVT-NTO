@@ -23,7 +23,7 @@ class LaneDetector(IDetector):
         self.bline_tracker = BrokenLineTracker()
         self.curvature_computer = LineCurvature()
 
-        self.perspective_transformer = PerspectiveTransformation(cfg.IMG_SHAPE, (320, 320), *cfg.PERSPECTIVE_TRANSFORM_PARAMS)
+        self.perspective_transformer = PerspectiveTransformation(cfg.IMG_SHAPE, (320, 400), *cfg.PERSPECTIVE_TRANSFORM_PARAMS)
         
     def forward(self, frame: cv2.Mat) -> dict:
         flat_view = self.perspective_transformer(frame)

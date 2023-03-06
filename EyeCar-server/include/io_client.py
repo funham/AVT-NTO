@@ -27,7 +27,7 @@ class IOClient(ABC):
         print('-----------------')
 
     def send_msg(self, command: str) -> None:
-        print(f'Sending command:\n{command}')
+        print(f'\nSending command:\n{command}')
 
     def handle_keyboard_input(self):
         key = cv2.waitKey(1)
@@ -68,8 +68,8 @@ class VideoPlayerClient(IOClient):
         time.sleep(1/self.fps)
 
         if not ret:
-            self._reset()
-            ret, frame = self.cap.read()
+            print("[VideoPlayerClient]: The end of the video.\n")
+            raise StopIteration
 
         return cv2.resize(frame, cfg.IMG_SHAPE) if ret else None
     

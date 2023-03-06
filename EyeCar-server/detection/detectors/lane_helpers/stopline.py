@@ -9,6 +9,7 @@ class StoplineDetector:
 
     def get_stopline_distance(self, layout: cv2.Mat) -> float:
         """Calculates the distance to the nearest crossroad."""
+        assert len(layout.shape) == 2
 
         # TODO implement for curved lines
         h, w = layout.shape
