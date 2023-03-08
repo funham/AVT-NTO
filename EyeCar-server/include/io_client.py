@@ -33,7 +33,7 @@ class IOClient(ABC):
         key = cv2.waitKey(1)
 
         if key in (27, ord('q')):
-            raise StopIteration
+            raise StopIteration(f'[{chr(key) if key!=27 else "ESC"}] pressed, exiting...')
 
 
 class LocalCameraClient(IOClient):
@@ -81,7 +81,8 @@ class VideoPlayerClient(IOClient):
             key = cv2.waitKey(0)
         
         if key in (27, ord('q')):
-            raise StopIteration
+            raise StopIteration(f'[{chr(key) if key!=27 else "ESC"}] pressed, exiting...')
+
 
         if key == ord('r'):
             self._reset()
@@ -104,7 +105,8 @@ class ImageFolderClient(IOClient):
             key = cv2.waitKey(0)
 
         if key in (ord('q'), 27):
-            raise StopIteration
+            raise StopIteration(f'[{chr(key) if key!=27 else "ESC"}] pressed, exiting...')
+
 
         self.last_pressed_key = key
 

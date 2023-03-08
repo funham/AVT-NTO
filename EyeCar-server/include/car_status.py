@@ -78,9 +78,8 @@ class CarStatus:
         For e.g. when the car has delivered the cargo to the sorting station
         or ran the requested distance, specified in cfg file.
         """
-        print("Ride termination requested")
 
         if callback is not None:
             callback(*args, **kwargs)
 
-        raise StopIteration
+        raise StopIteration("Ride terminated")

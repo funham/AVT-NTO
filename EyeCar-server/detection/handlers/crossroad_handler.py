@@ -46,10 +46,14 @@ class CrossroadTurnHandler(DetectionHandler):
         crossroad_dist = detections.get('crossroad_distance')
 
         if crossroad_dist == np.inf and self.prev_dist < np.inf and not self.turning:
-            self.turning = next(self.turns_iter)
+            try:
+                self.turning = next(self.turns_iter)
+            except StopIteration:
+                print("[ERROR]: CrossroadTurnHandler: no turns left")
+                return
+            
             self.last_turn_time = time.monotonic()
             self.turn(car)
-
 
         self.prev_dist = crossroad_dist
 

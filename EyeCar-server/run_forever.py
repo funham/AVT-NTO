@@ -84,7 +84,8 @@ if __name__ == '__main__':
         while True:
             main_loop()
 
-    except StopIteration:
+    except StopIteration as ex:
+        print(ex)
         print('Exiting main loop...')
 
     finally:

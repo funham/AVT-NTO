@@ -10,7 +10,7 @@ DEBUG = True
 IMG_W = 350
 IMG_H = 200
 IMG_SHAPE = (IMG_W, IMG_H)
-FPS = 60
+FPS = 10
 
 CAR_MAX_ANGLE: float = 45
 CAR_MAX_SPEED: int = 255
@@ -42,4 +42,4 @@ DEFAULT_MODEL_FOLDER = ''
 
 # toffset, boffset, margin, height, bwidth, twidth, wscale
 # PERSPECTIVE_TRANSFORM_PARAMS = (0.13, 0.171, 0.1, 0.5, 0.4, 0.17, 2.0)
-PERSPECTIVE_TRANSFORM_PARAMS =  (-0.1, -0.1,   0.1, 0.7, 0.4, 0.1, 3.0)
+PERSPECTIVE_TRANSFORM_PARAMS =  (-0.1, -0.1,   0.1, 0.7, 0.4, 0.1, 3.5)
