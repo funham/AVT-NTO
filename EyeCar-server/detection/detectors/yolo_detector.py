@@ -16,7 +16,7 @@ class YoloV5Detector(IDetector):
         cfg.CAR_MAX_ANGLE
         self.model = ...
 
-    def get_curvature_and_deviation(self, frame: cv2.Mat) -> dict:
+    def forward(self, frame: cv2.Mat) -> dict:
         return {}
 
 
@@ -24,6 +24,6 @@ class YoloV8Detector(IDetector):
     def __init__(self, path):
         self.model = ...
 
-    def get_curvature_and_deviation(self, frame: cv2.Mat) -> dict:
+    def forward(self, frame: cv2.Mat) -> dict:
         ...
         return {}

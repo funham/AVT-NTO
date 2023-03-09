@@ -9,7 +9,7 @@ import cv2
 
 class IDetector(ABC):
     @abstractmethod
-    def get_curvature_and_deviation(self, frame: cv2.Mat) -> dict:
+    def forward(self, frame: cv2.Mat) -> dict:
         pass
 
 
