@@ -9,7 +9,7 @@ from typing import Callable, Optional
 class LaneTurnHandler(DetectionHandler):
     class DetectionParser(DetectionHandler.DetectionParserBase):
         def __init__(self, data: dict):
-            self.deviation: float = data['lane_deviation']
+            self.deviation: float = data['lane_curvature']
 
     # TODO add PID
     def set_control(self, detections: dict, car: CarStatus) -> None:

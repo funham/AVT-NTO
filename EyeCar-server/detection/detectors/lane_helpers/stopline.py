@@ -25,7 +25,7 @@ class StoplineDetector:
         maxi = hist.argmax() # index of a brightest row in on the layout, supposedly a crossroad.
         
         # if the brightest row is not bright enough to be a crossroad then no crossroad detected
-        if hist[maxi] / 255 < 20:
+        if hist[maxi] / 255 < 60:
             print(hist[maxi] / 255)
             return np.inf
         
