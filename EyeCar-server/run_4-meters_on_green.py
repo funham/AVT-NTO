@@ -15,7 +15,7 @@ from include.car_control import CarControl
 
 # Detector imports
 from detection.detection import GlobalDetectionModel
-from detection.detectors.lane_detector import LaneDetector
+from detection.detectors.lane_detector import RoadDetector
 from detection.detectors.yolo_detector import YoloV5Detector
 
 # Handler imports
@@ -37,7 +37,7 @@ detector = GlobalDetectionModel()
 control = CarControl()
 
 # Adding detectors to the global detector object.
-detector.add_detector(LaneDetector())
+detector.add_detector(RoadDetector())
 detector.add_detector(YoloV5Detector("/trafficlight_detector"))
 
 

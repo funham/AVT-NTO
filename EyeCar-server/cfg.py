@@ -10,7 +10,7 @@ DEBUG = True
 IMG_W = 350
 IMG_H = 200
 IMG_SHAPE = (IMG_W, IMG_H)
-FPS = 10
+FPS = 60
 
 CAR_MAX_ANGLE: float = 45
 CAR_MAX_SPEED: int = 255

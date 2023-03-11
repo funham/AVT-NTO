@@ -1,64 +1,143 @@
+import cfg
 import cv2
 import numpy as np
 
 
-class LaneLines():
-    def __init__(self) -> None:
-        # normal deviation from the right line, relative to an image size
-        self.target_deviation = .5
+class LaneLines:
+    def get_deviation_simple(self, layout: cv2.Mat, out_img: cv2.Mat) -> float:
+        """Calculates the deviation of the car course from the center of the road.
+        returns values from `-1.0` to `1.0`, where `0.0` is the center of the road.
+        """
 
-    def get_deviation(self, line_index: int, img_width: int) -> float:
-        # TODO
-        return self.target_deviation - (line_index / img_width)
-
-    def find_line_start_index(self, laytout: cv2.Mat) -> tuple[int, int]:
-        ...
-    
-    def find_line_points(self, layout: cv2.Mat, nwindows: int) -> tuple[np.ndarray, np.ndarray]:
-        ...
-
-    def get_curvature_and_deviation(self, layout: cv2.Mat) -> tuple[float, float]:
-        out_img = np.dstack((layout, layout, layout))
-        h, w = layout.shape
-        nwindows = 9
-
-        window_h = layout.shape[0] // nwindows
-        window_w = 50
+        assert len(layout.shape) == 2
         
+        h, w = layout.shape
+        y0 = int(h - h/10)
+        hist = layout[y0:, :].sum(axis=0)
+        imid = hist.size // 2
+
+        # relative deviation of a left and right layout lines from center of an image
+        lmaxi = hist[:imid].argmax()
+        rmaxi = hist[imid:].argmax() + imid
+
+        lmax = hist[lmaxi] / 255
+        rmax = hist[rmaxi] / 255
+
+        if rmax < 20:
+            if cfg.DEBUG:
+                print(f'deviation is not cosnsidered')
+            return 0.0  # no deviation considered
+
+        ldev = 1 - lmaxi / imid
+        rdev = (rmaxi - imid) / imid
+
+        deviation = rdev - ldev  # if lines are equally distanced from center then deviation is zero 
+
+        if cfg.DEBUG:
+            h, w = layout.shape
+            lx, rx = imid - int(ldev * imid), imid + int(rdev * imid)
+
+            # center, left line, right line
+            cv2.line(out_img, (imid, y0), (imid, h), (255, 255, 0), 3, lineType=cv2.LINE_AA)
+            cv2.line(out_img, (lx, y0), (lx, h), (0, 0, 255), 6, lineType=cv2.LINE_AA)
+            cv2.line(out_img, (rx, y0), (rx, h), (0, 0, 255), 6, lineType=cv2.LINE_AA)
+
+            print(f"{deviation=:.2f}")
+
+        return deviation
+    
+    def get_deviation_only_right(self, layout: cv2.Mat, out_img: cv2.Mat) -> float:
+        img_w, img_h = layout.shape
+        line_x, line_y = self.get_line_points(layout, out_img, (20, 50))
+        coeff_vector = np.polyfit(line_y, line_x, deg=2)
+
+        y0 = img_h
+        arg_vector = np.array([y0] * 3)**[2, 1, 0]  # [y^2, y^1, y^0]
+
+        # x = ay^2 + by + c
+        x0 = np.dot(arg_vector, coeff_vector)
+
+        # ain't no statistics here ;)
+        normal_deviaton = 50
+        actual_deviation = x0 - img_w // 2
+
+        deviation = normal_deviaton - actual_deviation
+
+        return deviation
+
+    def get_line_points(self, layout: cv2.Mat, out_img: cv2.Mat, window_shape: tuple) -> tuple[float, float]:
+        h, w = layout.shape
+
+        window_h, window_w = window_shape
+        nwindows = h // window_h
 
         rlayout = layout[:, w//2:]
 
         bottom_right = rlayout[-window_h:-1, :]
         hist = bottom_right.sum(axis=0) / bottom_right.max()
-        
-        line_x = [hist.argmax()]
 
-        for i in range(1, nwindows):
-            y1 = h - window_h * (i + 1)
-            y2 = h - window_h * i
+        maxv, maxi = hist.max(), hist.argmax()
+        
+        # trying to find start of the line
+        for window_index in range(0, nwindows):
+            y1 = h - window_h * (window_index + 1)
+            y2 = h - window_h * window_index
+            hist = rlayout[y1:y2, :].sum(axis=0)
+            maxv, maxi = hist.max(), hist.argmax()
+
+            if maxv > 10:
+                start_window_index = window_index + 1
+                cv2.rectangle(out_img, (maxi-window_w//2 + w//2, y1), (maxi+window_w//2 + w//2, y2), (30, 30, 30), 1)
+                cv2.rectangle(out_img, (maxi-5 + w//2, y1), (maxi+5 + w//2, y2), (255, 30, 255), 3)
+                break  # we found the line!
+        
+        line_x = [maxi]
+        line_y = [layout.shape[0]-1-window_h//2]
+
+        for window_index in range(start_window_index, nwindows):
+            y1 = h - window_h * (window_index + 1)
+            y2 = h - window_h * window_index
 
             x1 = line_x[-1]-window_w//2
-            x2 = line_x[-1]+window_w//2
+            x2 = x1 + window_w
 
-            hist = rlayout[y1:y2, :].sum(axis=0)            
-            max_val = hist[x1:x2].max()
+            x1 = np.clip(x1, 0, w//2-1)
+            x2 = np.clip(x2, 0, w//2-1)
+
+            if x2 - x1 < window_w * .5:
+                break
+
+            hist = rlayout[y1:y2, x1:x2].sum(axis=0)
+            line_y.append(y2 - window_h // 2)
             
-            if max_val < 10:
-                last_diff = line_x[-1] - line_x[-2]
-                line_x.append(line_x[-1] + last_diff)
-                continue
+            
+            # if no line detected in window
+            if hist.max() / 255 < 5:
+                if len(line_x) < 2:
+                    # 0th order continuation
+                    inc = 0
+                elif len(line_x) == 2:
+                    # 1st order continuation
+                    dx = line_x[-1] - line_x[-2]
+                    inc = dx
+                else:
+                    # 2nd order continuation
+                    dx1 = line_x[-2] - line_x[-3]
+                    dx2 = line_x[-1] - line_x[-2]
+                    d2x = dx1 - dx2
+                    inc = dx2 + d2x
 
-            line_pos = hist[x1:x2].argmax() + x1
+                line_pos = line_x[-1] + inc
+                
+            else:
+                line_pos = hist.argmax() + x1
+
             line_x.append(line_pos)
 
-            cv2.rectangle(out_img, (x1+w//2, y1), (x2+w//2, y2), (255,0,0), 2)
-            cv2.rectangle(out_img, (line_pos+w//2-5, y1+window_h//3), (line_pos+w//2+5, y2-window_h//3), (0,0,255), 2)
-            
-        cv2.imshow('out_img', out_img)
-        print(line_x)
+            cv2.rectangle(out_img, (x1+w//2, y1), (x2+w//2, y2), (30, 30, 30), 1)
+            cv2.rectangle(out_img, (line_pos+w//2-5, y1), (line_pos+w//2+5, y2), (0,0,255), 2)
+        
+        line_x = np.array(line_x, dtype=np.int16) + w // 2
+        line_y = np.array(line_y, dtype=np.int16)
 
-
-lines = LaneLines()
-img = cv2.imread(r"C:\Users\fun1h\Downloads\transformed.png", 0)
-lines.get_curvature_and_deviation(img)
-cv2.waitKey(0)
+        return line_x, line_y

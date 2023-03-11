@@ -15,7 +15,7 @@ from include.car_control import CarControl
 
 # Detector imports
 from detection.detection import GlobalDetectionModel
-from detection.detectors.lane_detector import LaneDetector
+from detection.detectors.lane_detector import RoadDetector
 
 # Handler imports
 from detection.handlers.lane_handler import LaneTurnHandler
@@ -35,7 +35,7 @@ detector = GlobalDetectionModel()
 control = CarControl()
 
 # Adding detectors to the global detector object.
-detector.add_detector(LaneDetector())
+detector.add_detector(RoadDetector())
 
 # Registering handlers to detections
 control.register_handler(LaneTurnHandler())
