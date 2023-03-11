@@ -21,7 +21,7 @@ class LaneTurnHandler(DetectionHandler):
         k_dev = cfg.CAR_MAX_ANGLE / cfg.MAX_DEVIATION
         
         # adjusting angle to deviation
-        car.angle = det.deviation * k_dev  
+        car.angle = det.deviation * k_dev
 
 
 class LaneSpeedHandler(DetectionHandler):

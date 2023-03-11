@@ -2,13 +2,12 @@ import cfg
 import cv2
 import numpy as np
 
+
 def eval_poly(coeff_vector, x):
         deg = len(coeff_vector) - 1
         power_vector = list(range(deg+1)[::-1])
         arg_vector = np.array([x] * (deg+1))**power_vector  # [y^2, y^1, y^0]
-        y = np.dot(arg_vector, coeff_vector)
-
-        return y
+        return np.dot(arg_vector, coeff_vector)
 
 def draw_poly(out_img: cv2.Mat, coeff_vector: np.ndarray) -> None:
         h, w, _ = out_img.shape
@@ -16,6 +15,7 @@ def draw_poly(out_img: cv2.Mat, coeff_vector: np.ndarray) -> None:
         for y in range(h):
             x = int(eval_poly(coeff_vector, y))
             cv2.circle(out_img, (x, y), 1, (255, 0, 0), 2)
+
 
 class LaneLines:
     def get_deviation_simple(self, layout: cv2.Mat, out_img: cv2.Mat) -> float:
@@ -73,16 +73,16 @@ class LaneLines:
         normal_deviaton = 70
         actual_deviation = x0 - img_w // 2
 
-        deviation = normal_deviaton - actual_deviation
+        deviation = actual_deviation - normal_deviaton 
         x_nd = img_w//2 + normal_deviaton
 
         if cfg.DEBUG:
-            draw_poly(out_img, coeff_vector)
+            # draw_poly(out_img, coeff_vector)
             cv2.line(out_img, (int(x0), y0), (img_w//2, y0), (0, 255, 255), 1, lineType=cv2.LINE_AA)
             cv2.line(out_img, (img_w//2, y0), (img_w//2, y0-20), (0, 255, 0), 1, lineType=cv2.LINE_AA)
             cv2.circle(out_img, (int(x_nd), y0), 5, (255, 255, 0), 1)
         
-        return deviation
+        return 2 * deviation / img_w
 
     def get_line_points(self, layout: cv2.Mat, out_img: cv2.Mat, window_shape: tuple) -> tuple[float, float]:
         h, w = layout.shape

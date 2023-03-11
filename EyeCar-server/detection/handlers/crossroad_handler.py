@@ -45,7 +45,7 @@ class CrossroadTurnHandler(DetectionHandler):
     def set_control(self, detections: dict, car: CarStatus) -> None:
         crossroad_dist = detections.get('crossroad_distance')
 
-        if crossroad_dist == np.inf and self.prev_dist < np.inf and not self.turning:
+        if crossroad_dist == np.inf and self.prev_dist < 100 and not self.turning:
             try:
                 self.turning = next(self.turns_iter)
             except StopIteration:
@@ -63,6 +63,7 @@ class CrossroadTurnHandler(DetectionHandler):
         if cfg.DEBUG:
             print(f'{crossroad_dist=:.2f}')
             print(f'Turn direction: {self.turning}')
+
         turn_time = time.monotonic() - self.last_turn_time
 
         if turn_time >= self.target_turn_time:
