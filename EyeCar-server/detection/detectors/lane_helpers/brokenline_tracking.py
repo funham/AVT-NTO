@@ -44,46 +44,10 @@ class LayoutSegment:
         def touches_bottom(self):
             return self.bottom >= cfg.IMG_H
         
+        @property
         def is_correct(self):
-            if self.touches_bottom:
-                return True
-
-            w, h = self.box.shape
-
-            if abs(w - self.APPROX_W) > abs(h - self.APPROX_W):
-                w, h = h, w
-
-            diff = abs(w - self.APPROX_W) + abs(h - self.APPROX_H)
-
-            if cfg.DEBUG:
-                print(f'{w=:2.2f}, {h=:2.2f}, {diff=:2.2f}, correct: {diff < 70}')
-
-            return diff < 70
+            return self.box.area <= 1000
         
-        # TODO
-        @staticmethod
-        def fix(seg, img):
-            if seg.is_correct():
-                return seg
-            
-            w, h = seg.box.shape
-
-            src = np.float32(seg.box.boxpoints)
-            dst = np.float32([[0, 0], [0, w], [h, w], [h, 0]])
-
-            M = cv2.getPerspectiveTransform(src, dst)
-            M_inv = cv2.getPerspectiveTransform(dst, src)
-            lines = cv2.polylines(img, [np.int32(src)],
-                                  True, (255, 0, 0), 2, cv2.LINE_AA)
-            # print(img.shape)
-            # cv2.imshow('seg persp lines', img)
-
-
-            # seg_img = cv2.warpPerspective(img, M, np.int0([h, w]), flags=cv2.INTER_LINEAR)
-            # cv2.imshow('seg image', cv2.resize(seg_img, (0, 0), fx=5, fy=5))
-
-            return seg
-
 
 class BrokenLineTracker:
     def __init__(self):
@@ -99,16 +63,10 @@ class BrokenLineTracker:
         cnts, _ = cv2.findContours(broken_line_image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         bboxs = map(Rect, cnts)
         bboxs = sorted(bboxs, key=lambda bbox: bbox.y, reverse=True)[:2]
-
-        if len(bboxs) < 2:
-            if cfg.DEBUG:
-                cv2.imshow('broken line', broken_line_image)
-            return 0.0  # couldn't find two bounding boxes, so assume no change in distance.
-        
-
         curr_segments = list(map(LayoutSegment, bboxs))
-        curr_segments = list(map(LayoutSegment.fix, curr_segments, broken_line_image))
 
+        if len(bboxs) < 2 or not all([seg.is_correct for seg in curr_segments]):
+            return 0.0  # couldn't find two bounding boxes, so assume no change in distance.
 
         if not self._prev_segments:
             self._prev_segments = curr_segments            
@@ -123,11 +81,9 @@ class BrokenLineTracker:
             inc = curr_segments[0].bottom - self._prev_segments[1].bottom
 
         if cfg.DEBUG:
-            broken_line_boxes = cv2.cvtColor(broken_line_image, cv2.COLOR_GRAY2BGR)
             for bbox in bboxs:
-                cv2.drawContours(broken_line_boxes, [bbox.boxpoints], 0, (255, 0, 255), 2)
+                cv2.drawContours(out_img, [np.array(bbox.boxpoints) + [0, h//2]], 0, (0, 255, 0), 2)
             
-            cv2.imshow('broken line', cv2.resize(broken_line_boxes, (0, 0), fx=1, fy=1))
 
         self.distance_travelled += inc * cfg.PIXEL_TO_CM_RATIO
 
