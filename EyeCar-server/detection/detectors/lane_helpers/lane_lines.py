@@ -2,6 +2,20 @@ import cfg
 import cv2
 import numpy as np
 
+def eval_poly(coeff_vector, x):
+        deg = len(coeff_vector) - 1
+        power_vector = list(range(deg+1)[::-1])
+        arg_vector = np.array([x] * (deg+1))**power_vector  # [y^2, y^1, y^0]
+        y = np.dot(arg_vector, coeff_vector)
+
+        return y
+
+def draw_poly(out_img: cv2.Mat, coeff_vector: np.ndarray) -> None:
+        h, w, _ = out_img.shape
+        
+        for y in range(h):
+            x = int(eval_poly(coeff_vector, y))
+            cv2.circle(out_img, (x, y), 1, (255, 0, 0), 2)
 
 class LaneLines:
     def get_deviation_simple(self, layout: cv2.Mat, out_img: cv2.Mat) -> float:
@@ -46,23 +60,28 @@ class LaneLines:
 
         return deviation
     
+
     def get_deviation_only_right(self, layout: cv2.Mat, out_img: cv2.Mat) -> float:
-        img_w, img_h = layout.shape
-        line_x, line_y = self.get_line_points(layout, out_img, (20, 50))
-        coeff_vector = np.polyfit(line_y, line_x, deg=2)
+        img_h, img_w = layout.shape
+        line_x, line_y = self.get_line_points(layout, out_img, (15, 50))
+        coeff_vector = np.polyfit(line_y, line_x, deg=3)
 
-        y0 = img_h
-        arg_vector = np.array([y0] * 3)**[2, 1, 0]  # [y^2, y^1, y^0]
-
-        # x = ay^2 + by + c
-        x0 = np.dot(arg_vector, coeff_vector)
-
+        y0 = img_h-10
+        x0 = eval_poly(coeff_vector, y0)
+        
         # ain't no statistics here ;)
-        normal_deviaton = 50
+        normal_deviaton = 70
         actual_deviation = x0 - img_w // 2
 
         deviation = normal_deviaton - actual_deviation
+        x_nd = img_w//2 + normal_deviaton
 
+        if cfg.DEBUG:
+            draw_poly(out_img, coeff_vector)
+            cv2.line(out_img, (int(x0), y0), (img_w//2, y0), (0, 255, 255), 1, lineType=cv2.LINE_AA)
+            cv2.line(out_img, (img_w//2, y0), (img_w//2, y0-20), (0, 255, 0), 1, lineType=cv2.LINE_AA)
+            cv2.circle(out_img, (int(x_nd), y0), 5, (255, 255, 0), 1)
+        
         return deviation
 
     def get_line_points(self, layout: cv2.Mat, out_img: cv2.Mat, window_shape: tuple) -> tuple[float, float]:
@@ -77,6 +96,8 @@ class LaneLines:
         hist = bottom_right.sum(axis=0) / bottom_right.max()
 
         maxv, maxi = hist.max(), hist.argmax()
+
+        start_window_index = 0
         
         # trying to find start of the line
         for window_index in range(0, nwindows):
@@ -88,7 +109,7 @@ class LaneLines:
             if maxv > 10:
                 start_window_index = window_index + 1
                 cv2.rectangle(out_img, (maxi-window_w//2 + w//2, y1), (maxi+window_w//2 + w//2, y2), (30, 30, 30), 1)
-                cv2.rectangle(out_img, (maxi-5 + w//2, y1), (maxi+5 + w//2, y2), (255, 30, 255), 3)
+                cv2.rectangle(out_img, (maxi-5 + w//2, y1), (maxi+5 + w//2, y2), (50, 30, 50), 1)
                 break  # we found the line!
         
         line_x = [maxi]
@@ -135,9 +156,11 @@ class LaneLines:
             line_x.append(line_pos)
 
             cv2.rectangle(out_img, (x1+w//2, y1), (x2+w//2, y2), (30, 30, 30), 1)
-            cv2.rectangle(out_img, (line_pos+w//2-5, y1), (line_pos+w//2+5, y2), (0,0,255), 2)
+            cv2.rectangle(out_img, (line_pos+w//2-5, y1), (line_pos+w//2+5, y2), (0,0,100), 1)
         
         line_x = np.array(line_x, dtype=np.int16) + w // 2
         line_y = np.array(line_y, dtype=np.int16)
 
         return line_x, line_y
+
+    
