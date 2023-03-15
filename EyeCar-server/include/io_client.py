@@ -158,7 +158,17 @@ class EyeCarClient(IOClient):
     def __init__(self, ):
         self.arduino = Arduino(cfg.ARDUINO_PORT, baudrate=115200, timeout=10)
         time.sleep(1)
-        cap = cv2.VideoCapture(cfg.CAMERA_ID, cv2.CAP_V4L2)
+        self.cap = cv2.VideoCapture(cfg.CAMERA_ID, cv2.CAP_V4L2)
+
+    def read_frame(self) -> cv2.Mat | None:
+        ret, frame = self.cap.read()
+        
+        if not ret:
+            return None
+
+        frame = cv2.resize(frame, cfg.IMG_SHAPE)
+
+        return frame
 
     def send_msg(self, command: str) -> None:
         super().send_msg(command)
