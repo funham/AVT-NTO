@@ -7,6 +7,7 @@ such as reading frames from the camera and sending commands to a client.
 from enum import Enum
 from abc import ABC, abstractmethod
 from typing import Iterator
+from arduino import Arduino
 
 import time
 import beholder2048squad.Server
@@ -28,6 +29,7 @@ class IOClient(ABC):
 
     def send_msg(self, command: str) -> None:
         print(f'Sending command:\n{command}')
+
 
     def handle_keyboard_input(self):
         key = cv2.waitKey(1)
@@ -151,6 +153,32 @@ class ServerCameraClient(IOClient):
         super().send_msg(command)
         self._server.send_msg(command)
 
+
+class EyeCarClient(IOClient):
+    def __init__(self, ):
+        self.arduino = Arduino(cfg.ARDUINO_PORT, baudrate=115200, timeout=10)
+        time.sleep(1)
+        cap = cv2.VideoCapture(cfg.CAMERA_ID, cv2.CAP_V4L2)
+
+    def send_msg(self, command: str) -> None:
+        super().send_msg(command)
+
+        for cmd in command.split('\n'):
+            sign, args = cmd[:5], cmd[6:]
+            
+            if sign == 'SPEED':
+                speed = int(args)
+                
+                if speed < 30:
+                    self.arduino.stop()
+                    continue
+
+                self.arduino.set_speed(speed)
+
+            elif sign == 'ANGLE':
+                angle = int(args)
+                self.arduino.set_angle(90 + angle)
+            
 
 def create_io_client(in_mode, args) -> IOClient:
     if in_mode == InputType.LOCAL_CAMERA:
