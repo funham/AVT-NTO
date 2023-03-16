@@ -17,6 +17,8 @@ from detection.detectors.lane_helpers.thresholding import Thresholder
 from detection.detectors.lane_helpers.stopline import StoplineDetector
 from detection.detectors.lane_helpers.lane_lines import LaneLines
 
+from include.vid_writer import VideoWriter
+
 
 class RoadDetector(IDetector):
     def __init__(self) -> None:
@@ -38,7 +40,10 @@ class RoadDetector(IDetector):
         distance_travelled = self.broken_line_tracker.get_distance_travelled(layout, out_img)
         crossroad_distance = self.stopline_detector.get_stopline_distance(layout, out_img)
 
-        cv2.imshow('Road lines', out_img)
+        VideoWriter().write("Road lines", out_img)
+
+        if cfg.DEBUG:
+            cv2.imshow('Road lines', out_img)
 
         return {'lane_deviation': deviation,
                 'distance_travelled': distance_travelled,

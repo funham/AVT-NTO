@@ -5,6 +5,8 @@ import numpy as np
 from enum import Enum
 from include.car_status import CarStatus
 from detection.detection_handler import DetectionHandler
+from typing import List
+from include.intersection_directions import Directions
 
 
 class CrossroadStopHandler(DetectionHandler):
@@ -30,12 +32,7 @@ class CrossroadStopHandler(DetectionHandler):
             
 
 class CrossroadTurnHandler(DetectionHandler):
-    class Directions(Enum):
-        LEFT = 1
-        RIGHT = 2
-        STRAIGHT = 3
-
-    def __init__(self, route: list[Directions]) -> None:
+    def __init__(self, route: List[Directions]) -> None:
         self.turns_iter = iter(route)
         self.turning = None
         self.prev_dist = np.inf
@@ -74,15 +71,15 @@ class CrossroadTurnHandler(DetectionHandler):
         self.turn(car)
 
     def turn(self, car: CarStatus) -> None:
-        if self.turning == self.Directions.STRAIGHT:
+        if self.turning == Directions.STRAIGHT:
             car.angle = 0
-            self.target_turn_time = 3
+            self.target_turn_time = 4
 
-        elif self.turning == self.Directions.LEFT:
+        elif self.turning == Directions.LEFT:
             car.angle = -30
             self.target_turn_time = 5
 
 
-        elif self.turning == self.Directions.RIGHT:
-            car.angle = 45
-            self.target_turn_time = 2
+        elif self.turning == Directions.RIGHT:
+            car.angle = 34
+            self.target_turn_time = 3.5

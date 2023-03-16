@@ -14,7 +14,7 @@ class Arduino:  # класс ардуино! При создании объек�
         self.coding = coding
 
     def send_data(self, data: str):  # метод класса для отправки данных через UART
-        print('Sent to Arduino:', data)
+        # print('Sent to Arduino:', data)
         data += '\n'
         try:
             self.serial.write(data.encode(self.coding))

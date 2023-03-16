@@ -7,11 +7,11 @@ command to send to the car.
 
 from detection.detection_handler import DetectionHandler
 from include.car_status import CarStatus
-
+from typing import List
 
 class CarControl:
     status = CarStatus()
-    handlers: list[DetectionHandler] = []
+    handlers: List[DetectionHandler] = []
 
     def __new__(cls):
         if not hasattr(cls, 'instance'):

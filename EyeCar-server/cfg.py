@@ -4,8 +4,9 @@ import numpy as np
 from include.io_client import InputType
 
 
-INPUT_MODE = InputType.VIDEO_PLAYER
-DEBUG = True
+INPUT_MODE = InputType.EYECAR
+DEBUG = False
+MOVE = True
 
 IMG_W = 350
 IMG_H = 200
@@ -13,8 +14,8 @@ IMG_SHAPE = (IMG_W, IMG_H)
 FPS = 60
 
 CAR_MAX_ANGLE: float = 45
-CAR_MAX_SPEED: int = 255
-CAR_MIN_SPEED: int = 100
+CAR_MAX_SPEED: int = 1430 * MOVE
+CAR_MIN_SPEED: int = 1430 * MOVE
 MAX_DEVIATION: float = 1
 PIXEL_TO_CM_RATIO: float = 0.05
 
@@ -44,7 +45,8 @@ DEFAULT_MODEL_FOLDER = ''
 
 # toffset, boffset, margin, height, bwidth, twidth, wscale
 # PERSPECTIVE_TRANSFORM_PARAMS = (0.13, 0.171, 0.1, 0.5, 0.4, 0.17, 2.0)
-PERSPECTIVE_TRANSFORM_PARAMS =  (-0.1, -0.1,   0.1, 0.7, 0.4, 0.1, 4)
+PERSPECTIVE_TRANSFORM_PARAMS =  (-0.1, -0.1,   0.1, 0.6, 0.7, 0.2, 1.2)
 
 # (w, h)
 LANE_WINDOW_SIZE = (50, 15)
+LINE_NORMAL_DEVIATION = 70

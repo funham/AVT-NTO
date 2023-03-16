@@ -9,7 +9,7 @@ import numpy as np
 import time
 
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable, Optional, List
 
 
 class CarStatus:
@@ -18,7 +18,7 @@ class CarStatus:
     _angle: float = 0
     _suspended: bool = False
 
-    _set_speed_vals: list[float] = []
+    _set_speed_vals: List[float] = []
     _last_stop_time: float = 0
     _requested_stop: bool = False
 

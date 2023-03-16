@@ -1,7 +1,7 @@
 import cfg
 import cv2
 import numpy as np
-
+from include.vid_writer import VideoWriter
 
 class PerspectiveTransformation:
     """ This a class for transforming image between front view and top view """
@@ -51,13 +51,14 @@ class PerspectiveTransformation:
         """ Take a front view image and transform to top view """
         transformed = cv2.warpPerspective(frame, self.M, (self.out_w, self.out_h), flags=cv2.INTER_LINEAR)
         
-        if cfg.DEBUG:
-            p_mid_top = np.int32((self.tl + self.tr) / 2)
-            p_mid_bottom = np.int32((self.bl + self.br) / 2)
-            lines = cv2.polylines(frame, [np.int32(self.input_pts)],
-                                  True, (255, 0, 0), 2, cv2.LINE_AA)
-            lines = cv2.line(lines, p_mid_bottom, p_mid_top, (0, 0, 255), 1, cv2.LINE_AA)
-            cv2.imshow('lines', lines)
+        p_mid_top = np.int32((self.tl + self.tr) / 2)
+        p_mid_bottom = np.int32((self.bl + self.br) / 2)
+        lines = cv2.polylines(frame, [np.int32(self.input_pts)],
+                                True, (255, 0, 0), 2, cv2.LINE_AA)
+        lines = cv2.line(lines, p_mid_bottom, p_mid_top, (0, 0, 255), 1, cv2.LINE_AA)
+        # cv2.imshow('lines', lines)
+        
+        VideoWriter().write('persp trap', lines)
 
         if cfg.DEBUG:
             cv2.imshow('flat view', transformed)

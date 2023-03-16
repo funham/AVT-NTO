@@ -6,11 +6,11 @@ such as reading frames from the camera and sending commands to a client.
 
 from enum import Enum
 from abc import ABC, abstractmethod
-from typing import Iterator
-from arduino import Arduino
+from typing import Iterator, Optional, Union
+from include.arduino import Arduino
+from include.vid_writer import VideoWriter
 
 import time
-import beholder2048squad.Server
 import cv2
 import os
 import cfg
@@ -21,10 +21,11 @@ class InputType(Enum):
     IMAGE_FOLDER = 1
     SERVER_CAMERA = 2
     VIDEO_PLAYER = 3
+    EYECAR = 4
 
 
 class IOClient(ABC):
-    def read_frame(self) -> cv2.Mat | None:
+    def read_frame(self):
         print('-----------------')
 
     def send_msg(self, command: str) -> None:
@@ -44,12 +45,13 @@ class LocalCameraClient(IOClient):
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.IMG_W)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.IMG_W)
 
-    def read_frame(self) -> cv2.Mat | None:
+    def read_frame(self) :
         super().read_frame()
         ret, frame = self.cap.read()
 
         return cv2.resize(frame, cfg.IMG_SHAPE) if ret else None
     
+
 class VideoPlayerClient(IOClient):
     def __init__(self, path, fps):
         self.path = path
@@ -63,7 +65,7 @@ class VideoPlayerClient(IOClient):
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg.IMG_W)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg.IMG_H)
 
-    def read_frame(self) -> cv2.Mat | None:
+    def read_frame(self) :
         super().read_frame()
 
         ret, frame = self.cap.read()
@@ -95,7 +97,7 @@ class ImageFolderClient(IOClient):
         self.path = path
         self.reader = self.__reader()
 
-    def read_frame(self) -> cv2.Mat | None:
+    def read_frame(self) :
         super().read_frame()
         return next(self.reader)
 
@@ -112,7 +114,7 @@ class ImageFolderClient(IOClient):
 
         self.last_pressed_key = key
 
-    def __reader(self) -> Iterator[cv2.Mat | None]:
+    def __reader(self):
         path_list = [path for path in os.listdir(
             self.path) if path.endswith('.png') or path.endswith('.jpg')]
 
@@ -136,36 +138,37 @@ class ImageFolderClient(IOClient):
             yield cv2.resize(img, cfg.IMG_SHAPE)
 
 
-class ServerCameraClient(IOClient):
-    def __init__(self, udp_host: str,
-                 udp_port: int,
-                 tcp_host: str,
-                 tcp_port: int):
+# class ServerCameraClient(IOClient):
+#     def __init__(self, udp_host: str,
+#                  udp_port: int,
+#                  tcp_host: str,
+#                  tcp_port: int):
 
-        self._server = beholder2048squad.Server.Server(
-            udp_host, udp_port, tcp_host, tcp_port)
+#         self._server = beholder2048squad.Server.Server(
+#             udp_host, udp_port, tcp_host, tcp_port)
 
-    def read_frame(self) -> cv2.Mat | None:
-        super().read_frame()
-        return cv2.resize(self._server.recv_img(), cfg.IMG_SHAPE)
+#     def read_frame(self) :
+#         super().read_frame()
+#         return cv2.resize(self._server.recv_img(), cfg.IMG_SHAPE)
 
-    def send_msg(self, command: str) -> None:
-        super().send_msg(command)
-        self._server.send_msg(command)
+#     def send_msg(self, command: str) -> None:
+#         super().send_msg(command)
+#         self._server.send_msg(command)
 
 
 class EyeCarClient(IOClient):
-    def __init__(self, ):
+    def __init__(self):
         self.arduino = Arduino(cfg.ARDUINO_PORT, baudrate=115200, timeout=10)
         time.sleep(1)
         self.cap = cv2.VideoCapture(cfg.CAMERA_ID, cv2.CAP_V4L2)
 
-    def read_frame(self) -> cv2.Mat | None:
+    def read_frame(self) :
         ret, frame = self.cap.read()
         
         if not ret:
             return None
 
+        VideoWriter().write('run', frame)        
         frame = cv2.resize(frame, cfg.IMG_SHAPE)
 
         return frame
@@ -177,7 +180,9 @@ class EyeCarClient(IOClient):
             sign, args = cmd[:5], cmd[6:]
             
             if sign == 'SPEED':
-                speed = int(args)
+                k = 1
+                b = 0
+                speed = int(args) * k + b
                 
                 if speed < 30:
                     self.arduino.stop()
@@ -187,7 +192,7 @@ class EyeCarClient(IOClient):
 
             elif sign == 'ANGLE':
                 angle = int(args)
-                self.arduino.set_angle(90 + angle)
+                self.arduino.set_angle(90 - angle)
             
 
 def create_io_client(in_mode, args) -> IOClient:
@@ -200,5 +205,7 @@ def create_io_client(in_mode, args) -> IOClient:
                                   tcp_host=cfg.TCP_HOST, tcp_port=cfg.TCP_PORT)
     elif in_mode == InputType.VIDEO_PLAYER:
         return VideoPlayerClient(path=os.path.join(args.video_source_path, args.video_source_file), fps=cfg.FPS)
+    elif in_mode == InputType.EYECAR:
+        return EyeCarClient()
 
     raise ValueError('Invalid input mode')

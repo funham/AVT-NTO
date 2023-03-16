@@ -31,20 +31,17 @@ class LaneLines:
             y0 = img_h - 10
             x0 = eval_poly(coeff_vector, y0)
 
-            # ain't no statistics here ;)
-            normal_deviaton = 70
             actual_deviation = x0 - img_w // 2
 
-            deviation = actual_deviation - normal_deviaton
-            x_nd = img_w // 2 + normal_deviaton
+            deviation = actual_deviation - cfg.LINE_NORMAL_DEVIATION
+            x_nd = img_w // 2 + cfg.LINE_NORMAL_DEVIATION
 
             deviations.append(deviation)
 
-            if cfg.DEBUG:
-                draw_poly(out_img, coeff_vector)
-                cv2.line(out_img, (int(x0), y0), (img_w // 2, y0), (0, 255, 255), 1, lineType=cv2.LINE_AA)
-                cv2.line(out_img, (img_w // 2, y0), (img_w // 2, y0 - 20), (0, 255, 0), 1, lineType=cv2.LINE_AA)
-                cv2.circle(out_img, (int(x_nd), y0), 5, (255, 255, 0), 1)
+            draw_poly(out_img, coeff_vector)
+            cv2.line(out_img, (int(x0), y0), (img_w // 2, y0), (0, 255, 255), 1, lineType=cv2.LINE_AA)
+            cv2.line(out_img, (img_w // 2, y0), (img_w // 2, y0 - 20), (0, 255, 0), 1, lineType=cv2.LINE_AA)
+            cv2.circle(out_img, (int(x_nd), y0), 5, (255, 255, 0), 1)
 
         return 2 * deviations[-1] / img_w
 
