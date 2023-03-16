@@ -1,5 +1,5 @@
 TESTING = True
-TEST_IMGS = r"res\NoMove"
+TEST_IMGS = r"Hub\res\New"
 
 TARGET_MATRIX_MARKING = (2, 9, 1, 6)
 TARGET_STRIPES_MARKING = (5, 7, 2)

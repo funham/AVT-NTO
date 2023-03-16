@@ -8,14 +8,9 @@ class Color:
     def get_color_code(color: np.ndarray) -> int:
         h_colors = {0: 0,    # 0 white
                     1: 0,    # 1 black
-                    2: 15,   # 2 red
-                    3: 22,   # 3 orange
-                    4: 33,   # 4 yellow
-                    5: 78,   # 5 green
-                    6: 96,   # 6 cyan
-                    7: 130,  # 7 blue
-                    8: 144}  # 8 violet
-        # 9: 170} # 9 magenta
+                    2: 22,   # 2 red
+                    3: 78,   # 5 green
+                    4: 144}  # 7 blue
         color = np.int32(color)
 
 
@@ -24,8 +19,6 @@ class Color:
             return 1
         elif s < (255*0.2) and v > (255*0.8):  # most likely white
             return 0
-        elif s < (255*0.35):  # most likely fricking magenta
-            return 9
         else:
             for key, hue in h_colors.items():
                 if h < hue:
@@ -36,12 +29,7 @@ class Color:
         color_idx = {0: "white",
                      1: "black",
                      2: "red",
-                     3: "orange",
-                     4: "yellow",
-                     5: "green",
-                     6: "cyan",
-                     7: "blue",
-                     8: "violet",
-                     9: "mag enta"}
+                     3: "green",
+                     4: "blue"}
 
         return tuple([color_idx[mark] for mark in marks])

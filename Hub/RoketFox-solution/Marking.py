@@ -72,7 +72,7 @@ class StripesMarking(Marking):
         h, w, _ = face.shape
         sw = (w//4) # sector width
         sh = (w//4) # sector height
-        m = 10 # margins
+        m = 20 # margins
 
         for x in range(4):
             left_sector = face[m:h-m, m:sw-m]
@@ -86,7 +86,7 @@ class StripesMarking(Marking):
                     # yield face[sh+m:h-m, i*sw+m:(i+1)*sw-m]
             else:
                 face = cv2.rotate(face, cv2.ROTATE_90_CLOCKWISE)
-                
+        
         _1 = face[sh+m:h-m, 1*sw+m:2*sw-m]
         _2 = face[sh+m:h-m, 2*sw+m:3*sw-m]
         _3 = face[sh+m:h-m, 3*sw+m:4*sw-m]

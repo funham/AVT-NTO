@@ -32,12 +32,37 @@ def get_flatten_view(img: cv2.Mat) -> cv2.Mat:
 
     return img
 
+def contast(img, x):
+    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    h,s,v = cv2.split(hsv)
+
+    x = 255 - x
+    v[v>x] = 255
+    v[v<x] = x
+
+    hsv = cv2.merge((h, s, v))
+    return cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
+
+def brightnes(img, x):
+    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    h,s,v = cv2.split(hsv)
+
+    x = 255 - x
+    s[s>x] = x
+    s[s<x] = 0
+
+    v = s
+
+    hsv = cv2.merge((h,s,v))
+    return cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 
 cv2.namedWindow("Canny", cv2.WINDOW_NORMAL)
 cv2.createTrackbar('t1', 'Canny', 0, 50, lambda x: None)
 cv2.createTrackbar('t2', 'Canny', 0, 50, lambda x: None)
 cv2.createTrackbar('d', 'Canny', 0, 10, lambda x: None)
 cv2.createTrackbar('e', 'Canny', 0, 10, lambda x: None)
+cv2.createTrackbar('g', 'Canny', 0, 10, lambda x: None)
+cv2.createTrackbar('c', 'Canny', 0, 255, lambda x: None)
 
 cap = ImageCapture(cfg.TEST_IMGS)
 
@@ -50,12 +75,27 @@ while True:
     
     frame = get_flatten_view(frame)
 
-    t1 = cv2.getTrackbarPos('t1', 'Canny')
-    t2 = cv2.getTrackbarPos('t2', 'Canny')
+    t1 = cv2.getTrackbarPos('t1', 'Canny')*10
+    t2 = cv2.getTrackbarPos('t2', 'Canny')*10
     d = cv2.getTrackbarPos('d', 'Canny')
     e = cv2.getTrackbarPos('e', 'Canny')
+    g = 2*cv2.getTrackbarPos('g', 'Canny')+1
+    c = cv2.getTrackbarPos('c', 'Canny')
+
+    frame = contast(frame, c)
+
+    gaus = cv2.GaussianBlur(frame, (g, g), 0)
+    grsc = cv2.cvtColor(gaus, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(grsc, t1, t2)
+    edges = cv2.dilate(edges, None, iterations=d)
+    edges = cv2.erode(edges, None, iterations=e)
     
-    find_all_contours(frame, t1, t2, d, e)
+    raw_cnts, _ = cv2.findContours(
+        edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    frame = cv2.drawContours(frame, raw_cnts, -1, (0,0,255), 1)
+    
+    cv2.imshow("fr",frame)
 
 print('Exiting main loop')
 cv2.destroyAllWindows()
