@@ -7,6 +7,24 @@ from include.io_client import IOClient, ImageFolderClient
 from include.intersection_directions import Directions
 
 
+class KeyPoints:
+    sift = cv2.xfeatures2d.SIFT_create()
+    bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
+
+    def __init__(self, img: cv2.Mat) -> None:
+        if len(img.shape) > 2:
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            self.keypoints, self.descriptors = KeyPoints.sift.detectAndCompute(img, None)
+    
+    @staticmethod
+    def descriptors_dist(descriptors1: np.ndarray, descriptors2: np.ndarray) -> float:
+        matches = KeyPoints.bf.match(descriptors1, descriptors2)
+        matches = sorted(matches, key=lambda x: x.distance)
+        distances = [dmatch.distance for dmatch in matches]
+
+        return sum(distances) / len(distances)    
+
+
 class Locate:
     pos_route_entry = {
         1: [Directions.RIGHT, Directions.STRAIGHT, Directions.RIGHT],
@@ -26,9 +44,7 @@ class Locate:
         return route
 
     def tmp_err(self, frame: cv2.Mat) -> list:
-        tmps = [self.img_cap.read_frame() for _ in range(3)]
-        errs = [(tmp ^ frame).sum() for tmp in tmps]
-
+        
         return errs
 
     def accumulate_frame(self, nframes: int, delay: float):
@@ -38,3 +54,4 @@ class Locate:
             time.sleep(delay)
 
         return out_img
+

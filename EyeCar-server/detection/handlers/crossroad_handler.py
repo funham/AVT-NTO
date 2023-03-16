@@ -71,15 +71,17 @@ class CrossroadTurnHandler(DetectionHandler):
         self.turn(car)
 
     def turn(self, car: CarStatus) -> None:
-        if self.turning == Directions.STRAIGHT:
+        if self.turning is None:
+            return
+    
+        elif self.turning == Directions.STRAIGHT:
             car.angle = 0
-            self.target_turn_time = 4
+            car.dist(cfg.CAR_TURN_SPEED, 200)
 
         elif self.turning == Directions.LEFT:
             car.angle = -30
-            self.target_turn_time = 5
-
+            car.dist(cfg.CAR_TURN_SPEED, 300)
 
         elif self.turning == Directions.RIGHT:
             car.angle = 34
-            self.target_turn_time = 3.5
+            car.dist(cfg.CAR_TURN_SPEED, 150)
