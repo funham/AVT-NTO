@@ -26,13 +26,13 @@ class StoplineDetector:
         
         # if the brightest row is not bright enough to be a crossroad then no crossroad detected
         if hist[maxi] / 255 < 60:
-            return np.inf
+            return np.inf, (0, 0), (0, 0)
         
-        if cfg.DEBUG:
-            y1 = maxi + y0 - stopline_h // 2
-            y2 = y1 + stopline_h
+        y1 = maxi + y0 - stopline_h // 2
+        y2 = y1 + stopline_h
             
-            cv2.rectangle(out_img, (x1, y1), (x2, y2), (255, 255, 0), 2)
+        cv2.rectangle(out_img, (x1, y1), (x2, y2), (255, 255, 0), 2)
         
         dist = (h - y0 - maxi) * cfg.PIXEL_TO_CM_RATIO
-        return dist
+        print(dist, (x1, y1), (x2, y2))
+        return dist, (x1, y1), (x2, y2)

@@ -36,9 +36,9 @@ class RoadDetector(IDetector):
 
         out_img = np.dstack((layout, layout, layout))
 
-        deviation = self.lane_lines.get_deviation_only_right(layout, out_img)
         distance_travelled = self.broken_line_tracker.get_distance_travelled(layout, out_img)
-        crossroad_distance = self.stopline_detector.get_stopline_distance(layout, out_img)
+        crossroad_distance, p1, p2 = self.stopline_detector.get_stopline_distance(layout, out_img)
+        deviation = self.lane_lines.get_deviation_only_right(layout, out_img, p1, p2)
 
         VideoWriter().write("Road lines", out_img)
 
@@ -47,4 +47,5 @@ class RoadDetector(IDetector):
 
         return {'lane_deviation': deviation,
                 'distance_travelled': distance_travelled,
-                'crossroad_distance': crossroad_distance}
+                'crossroad_distance': crossroad_distance,
+                'crossroad_rect' : (p1, p2)}

@@ -18,8 +18,12 @@ def draw_poly(out_img: cv2.Mat, coeff_vector: np.ndarray) -> None:
 
 
 class LaneLines:
-    def get_deviation_only_right(self, layout: cv2.Mat, out_img: cv2.Mat) -> float:
+    def get_deviation_only_right(self, layout: cv2.Mat, out_img: cv2.Mat, p1, p2) -> float:
         img_h, img_w = layout.shape
+        x1, y1 = p1
+        x2, y2 = p2
+        layout[y1:y2, x1:x2] = 0
+        
         lines = self.get_lines(layout, out_img)
 
         deviations = []
