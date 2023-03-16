@@ -2,6 +2,9 @@ import cfg
 import cv2
 import numpy as np
 import time
+import pickle
+import math
+import os
 
 from include.io_client import IOClient, ImageFolderClient
 from include.intersection_directions import Directions
@@ -17,13 +20,12 @@ class KeyPoints:
             self.keypoints, self.descriptors = KeyPoints.sift.detectAndCompute(img, None)
     
     @staticmethod
-    def descriptors_dist(descriptors1: np.ndarray, descriptors2: np.ndarray) -> float:
-        matches = KeyPoints.bf.match(descriptors1, descriptors2)
+    def descriptors_dist(kp1, kp2) -> float:
+        matches = KeyPoints.bf.match(kp1.descriptors, kp2.descriptors)
         matches = sorted(matches, key=lambda x: x.distance)
         distances = [dmatch.distance for dmatch in matches]
 
         return sum(distances) / len(distances)    
-
 
 class Locate:
     pos_route_entry = {
@@ -35,23 +37,40 @@ class Locate:
     def __init__(self, io_client: IOClient):
         self.cap = io_client
         self.img_cap = ImageFolderClient('/res/orientation/')
+        #self.start_kp = pickle.load(open('cached_keypoints.pkl', 'rb'))
+        self.start_kp = {}
+        for start_point in os.listdir('res/keypoints_imgs'):
+            start_point = int(start_point)
+            for img_name in os.listdir(f'res/keypoints_imgs/{start_point}'):
+                img = cv2.imread(f'res/keypoints_imgs/{start_point}/{img_name}')
+                kp = KeyPoints(img)
+                self.start_kp[start_point] = self.start_kp.get(start_point, []) + [kp]
     
     def calculate_route(self) -> list:
-        frame = self.accumulate_frame(nframes=10, delay=0.05)
-        pos_index = np.argmin(self.tmp_err(frame))  # smallest error
-        route = self.pos_route_entry[pos_index]
+        frame = self.cap.read_frame()
+        kp_fame = KeyPoints(frame)
+
+        min_distance = math.inf
+        min_pos_index = 1
+        for pos_index, kps in self.start_kp.items():
+            mean_distance = 0
+            for start_kp in kps:
+                distance = KeyPoints.descriptors_dist(kp_fame, start_kp)
+                mean_distance += distance / len(kps)
+            if mean_distance < min_distance:
+                min_distance = mean_distance
+                min_pos_index = pos_index
+        
+        print(min_pos_index)
+        route = self.pos_route_entry[min_pos_index]
 
         return route
 
-    def tmp_err(self, frame: cv2.Mat) -> list:
-        
-        return errs
-
-    def accumulate_frame(self, nframes: int, delay: float):
+    """def accumulate_frame(self, nframes: int, delay: float):
         out_img = np.zeros(cfg.IMG_SHAPE)
         for _ in range(nframes):
             out_img += self.cap.read_frame().astype(np.float32) / nframes
             time.sleep(delay)
 
-        return out_img
+        return out_img"""
 

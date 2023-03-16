@@ -26,6 +26,8 @@ from detection.detectors.lane_detector import RoadDetector
 from detection.handlers.lane_handler import LaneTurnHandler
 from detection.handlers.crossroad_handler import CrossroadTurnHandler
 
+from include.locate import Locate
+
 TARGET_DISTANCE = np.inf  # No objective on travelling distance
 
 parser = argparse.ArgumentParser(parents=[get_args_parser()])
@@ -35,9 +37,9 @@ args = parser.parse_args()
 io_client = io_client_manager.create_io_client(cfg.INPUT_MODE, args)
 detector = GlobalDetectionModel()
 control = CarControl()
-# locator = Locate
+locator = Locate(io_client)
 
-# route = locator.calculate_route(io_client)
+# route = locator.calculate_route()
 route = (Directions.RIGHT for _ in range(10))
 
 # Adding detectors to the global detector object.
