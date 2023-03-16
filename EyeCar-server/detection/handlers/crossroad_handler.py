@@ -61,14 +61,15 @@ class CrossroadTurnHandler(DetectionHandler):
             print(f'{crossroad_dist=:.2f}')
             print(f'Turn direction: {self.turning}')
 
-        turn_time = time.monotonic() - self.last_turn_time
+        turn_time = time.monotonic() - self.last_turn_time - cfg.CROSSROAD_DELAY
 
         if turn_time >= self.target_turn_time:
             self.turning = None
             car.angle = 0
             self.target_turn_time = None
         
-        self.turn(car)
+        if turn_time > 0:
+            self.turn(car)
 
     def turn(self, car: CarStatus) -> None:
         if self.turning is None:
@@ -76,12 +77,15 @@ class CrossroadTurnHandler(DetectionHandler):
     
         elif self.turning == Directions.STRAIGHT:
             car.angle = 0
-            car.dist(cfg.CAR_TURN_SPEED, 200)
+            self.target_turn_time = 4
+            # car.dist(cfg.CAR_TURN_SPEED, 200)
 
         elif self.turning == Directions.LEFT:
             car.angle = -30
-            car.dist(cfg.CAR_TURN_SPEED, 300)
+            self.target_turn_time = 5
+            # car.dist(cfg.CAR_TURN_SPEED, 300)
 
         elif self.turning == Directions.RIGHT:
-            car.angle = 34
-            car.dist(cfg.CAR_TURN_SPEED, 150)
+            car.angle = 38
+            self.target_turn_time = 3.5
+            # car.dist(cfg.CAR_TURN_SPEED, 150)

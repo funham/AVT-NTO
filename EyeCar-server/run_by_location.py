@@ -14,8 +14,8 @@ from args import get_args_parser
 # IO and controls imports
 import include.io_client as io_client_manager
 from include.car_control import CarControl
-from include.locate import Locate
 from include.intersection_directions import Directions
+# from include.locate import Locate
 
 # Detector imports
 from detection.detection import GlobalDetectionModel

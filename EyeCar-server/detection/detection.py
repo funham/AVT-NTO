@@ -24,6 +24,6 @@ class GlobalDetectionModel:
         detection = {}
 
         for detector in self.detectors:
-            detection |= detector.forward(frame)
+            detection.update(detector.forward(frame))
 
         return detection
