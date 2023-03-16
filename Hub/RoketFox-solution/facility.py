@@ -1,7 +1,7 @@
 # from facility_api import *
 import numpy as np
 import config as cfg
-from Coords import CargoPosition
+from coords import CargoPosition
 
 
 def MoveToHoarder(hoarder: int):

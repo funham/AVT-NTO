@@ -20,7 +20,7 @@ class ImageCapture:
         yield True, cv2.imread(path)
 
         while True:
-            key = cv2.waitKey(0)
+            key = cv2.waitKey(1)
 
             if key == 27 or key == ord('q'):
                 yield False, None

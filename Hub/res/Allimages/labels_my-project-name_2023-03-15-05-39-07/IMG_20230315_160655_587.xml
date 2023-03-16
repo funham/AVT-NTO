@@ -1,0 +1,37 @@
+<annotation>
+	<folder>my-project-name</folder>
+	<filename>IMG_20230315_160655_587.PNG</filename>
+	<path>/my-project-name/IMG_20230315_160655_587.PNG</path>
+	<source>
+		<database>Unspecified</database>
+	</source>
+	<size>
+		<width>505</width>
+		<height>395</height>
+		<depth>3</depth>
+	</size>
+	<object>
+		<name>Cube</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>270</xmin>
+			<ymin>134</ymin>
+			<xmax>324</xmax>
+			<ymax>191</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>Cube</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>350</xmin>
+			<ymin>71</ymin>
+			<xmax>410</xmax>
+			<ymax>137</ymax>
+		</bndbox>
+	</object>
+</annotation>

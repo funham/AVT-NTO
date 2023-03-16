@@ -30,15 +30,17 @@ class FaceContour:
         return self.cnt
 
 
-def find_all_contours(img: cv2.Mat) -> Generator:
-    gaus_ksize = 7
-    canny_tres1, canny_tres2 = 200, 100
+def find_all_contours(img: cv2.Mat, t1 = 200, t2 = 100, d = 0, e = 0) -> Generator:
+    gaus_ksize = 9
+    canny_tres1, canny_tres2 = t1, t2
 
     grsc = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gaus = cv2.GaussianBlur(grsc, (gaus_ksize, gaus_ksize), 0)
     edges = cv2.Canny(gaus, canny_tres1, canny_tres2)
-    edges = cv2.dilate(edges, None, iterations=0)
-    edges = cv2.erode(edges, None, iterations=0)
+    edges = cv2.dilate(edges, None, iterations=d)
+    edges = cv2.erode(edges, None, iterations=e)
+
+    cv2.imshow("edges", edges)
 
     raw_cnts, _ = cv2.findContours(
         edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -53,8 +55,13 @@ def find_weight_contours(img: cv2.Mat) -> Generator:
     '''
     contours = find_all_contours(img)
 
-    MIN_FACE_AREA = 20000
+    # for i in contours:
+    #     print(i.area)
+
+    MIN_FACE_AREA = 6000
+    MAX_FACE_AREA = 10000
     contours = filter(lambda c: c.area > MIN_FACE_AREA, contours)
+    contours = filter(lambda c: c.area < MAX_FACE_AREA, contours)
 
     # for c in contours:
     #     print(c.area)

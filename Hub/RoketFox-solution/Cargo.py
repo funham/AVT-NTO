@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 from typing import *
-from Marking import MatrixMarking, StripesMarking
-from Coords import CargoPosition
+from marking import MatrixMarking, StripesMarking
+from coords import CargoPosition
 from detection import find_weight_contours
 
 

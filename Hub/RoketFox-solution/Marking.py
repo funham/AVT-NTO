@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from functools import partial
 from itertools import product
-from Color import Color
+from color import Color
 from typing import *
 from abc import ABC, abstractmethod
 
