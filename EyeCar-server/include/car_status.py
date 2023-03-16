@@ -13,14 +13,13 @@ from typing import Callable, Optional, List
 
 
 class CarStatus:
-    
-
     _angle: float = 0
     _suspended: bool = False
 
     _set_speed_vals: List[float] = []
     _last_stop_time: float = 0
     _requested_stop: bool = False
+    parking_requested: bool = False
 
     def __init__(self) -> None:
         self.reset()
@@ -83,3 +82,7 @@ class CarStatus:
             callback(*args, **kwargs)
 
         raise StopIteration("Ride terminated")
+    
+
+    def park(self):
+        self.parking_requested = True

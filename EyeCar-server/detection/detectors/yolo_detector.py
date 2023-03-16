@@ -7,9 +7,8 @@ import cv2
 import yolopy
 
 from detection.detection import IDetector
+from include.vid_writer import VideoWriter
 
-# TODO implement correct working with YOLO model
-# and return data in dict with a correct structure
 
 class YoloV4Detector(IDetector):
     def __init__(self, path):
@@ -25,9 +24,22 @@ class ParkingDetector(YoloV4Detector):
     def forward(self, frame: cv2.Mat) -> dict:
         classes, scores, boxes = self.model.detect(frame)
 
+        if len(boxes) == 0:
+            VideoWriter().write('parking', frame)
+            return {}
+
         box = boxes[0]
 
-        dist = box.area
+        x1, y1, x2, y2 = box
+
+        detected = frame.copy()
+
+        cv2.rectangle(detected, (x1, y1), (x2, y2), (244, 2, 232), 2, cv2.LINE_AA)
+        VideoWriter().write('parking', detected)
+
+        area = (x2 - x1) * (y2 - y1)
+
+        dist = area * .5
 
         return {'parking_dist': dist}
 

@@ -30,6 +30,9 @@ class CarControl:
         for handler in self.handlers:
             handler.set_control(detections, self.status)
 
+        if self.status.parking_requested:
+            return "PARK"
+
         control_speed = round(self.status.speed)
         control_angle = round(self.status.angle)
 

@@ -12,6 +12,8 @@ class ParkingHandler(DetectionHandler):
             return
         
         dist = detections['parking_distance']
-        
+
+        print(f'Parking distance: {dist}')
+
         if dist < cfg.PARKING_STOP_DISTANCE:
-            
+            car.park()

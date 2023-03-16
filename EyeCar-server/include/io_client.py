@@ -176,6 +176,10 @@ class EyeCarClient(IOClient):
     def send_msg(self, command: str) -> None:
         super().send_msg(command)
 
+        if command == "PARK":
+            self._park()
+            raise StopIteration("Endpoint reached")
+
         for cmd in command.split('\n'):
             sign, args = cmd[:5], cmd[6:]
             
@@ -193,6 +197,17 @@ class EyeCarClient(IOClient):
             elif sign == 'ANGLE':
                 angle = int(args)
                 self.arduino.set_angle(90 - angle)
+
+    def _park(self):
+        self.arduino.set_speed(cfg.CAR_MIN_SPEED)
+        self.arduino.set_angle(90 + 10)
+        time.sleep(2)
+        self.arduino.set_angle(90 - 10)
+        time.sleep(2)
+
+        self.arduino.set_angle(90)
+        self.arduino.stop()
+
             
 
 def create_io_client(in_mode, args) -> IOClient:

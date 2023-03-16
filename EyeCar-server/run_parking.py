@@ -23,11 +23,8 @@ from detection.detectors.yolo_detector import ParkingDetector
 
 # Handler imports
 from detection.handlers.lane_handler import LaneTurnHandler
-from detection.handlers.crossroad_handler import CrossroadTurnHandler
+from detection.handlers.parking_handler import ParkingHandler
 
-from include.locate import Locate
-
-TARGET_DISTANCE = np.inf  # No objective on travelling distance
 
 parser = argparse.ArgumentParser(parents=[get_args_parser()])
 args = parser.parse_args()
@@ -36,18 +33,15 @@ args = parser.parse_args()
 io_client = io_client_manager.create_io_client(cfg.INPUT_MODE, args)
 detector = GlobalDetectionModel()
 control = CarControl()
-locator = Locate(io_client)
 
-# route = locator.calculate_route()
-route = (Directions.RIGHT for _ in range(10))
 
 # Adding detectors to the global detector object.
 detector.add_detector(RoadDetector())
+detector.add_detector(ParkingDetector('../anything_yolov4-tiny-obj_uint8.tmfile'))
 
 # Registering handlers to detections
 control.register_handler(LaneTurnHandler())
-control.register_handler(CrossroadTurnHandler(route))
-
+control.register_handler(ParkingHandler())
 
 def main_loop() -> None:
     frame = io_client.read_frame()
