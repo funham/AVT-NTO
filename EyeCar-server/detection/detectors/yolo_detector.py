@@ -29,15 +29,16 @@ class ParkingDetector(YoloV4Detector):
             return {}
 
         box = boxes[0]
+        print(boxes)
 
-        x1, y1, x2, y2 = box
+        x, y, w, h = box
 
         detected = frame.copy()
 
-        cv2.rectangle(detected, (x1, y1), (x2, y2), (244, 2, 232), 2, cv2.LINE_AA)
+        cv2.rectangle(detected, (x, y), (x+w, y+h), (244, 2, 232), 2, cv2.LINE_AA)
         VideoWriter().write('parking', detected)
 
-        area = (x2 - x1) * (y2 - y1)
+        area = w * h
 
         dist = area * .5
 
