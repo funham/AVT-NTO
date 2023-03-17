@@ -89,3 +89,5 @@ class CrossroadTurnHandler(DetectionHandler):
             car.angle = 38
             self.target_turn_time = 3
             # car.dist(cfg.CAR_TURN_SPEED, 150)
+        elif self.turning == Directions.HUB:
+            car.park()

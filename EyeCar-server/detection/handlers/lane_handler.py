@@ -10,13 +10,19 @@ class LaneTurnHandler(DetectionHandler):
     class DetectionParser(DetectionHandler.DetectionParserBase):
         def __init__(self, data: dict):
             self.deviation: float = data['lane_deviation']
+            self.sl_dist: float = data['crossroad_distance']
 
     # TODO add PID
     def set_control(self, detections: dict, car: CarStatus) -> None:
         try:
             det = self.DetectionParser(detections)
-        except KeyError:
-            return print("[LaneTurnHandler]: key not found")
+        except KeyError as err:
+            print("[LaneTurnHandler]: key not found:")
+            print(err)
+            return
+
+        if det.sl_dist < 30:
+            return
 
         k_dev = cfg.CAR_MAX_ANGLE / cfg.MAX_DEVIATION
         

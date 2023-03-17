@@ -138,24 +138,6 @@ class ImageFolderClient(IOClient):
             yield cv2.resize(img, cfg.IMG_SHAPE)
 
 
-# class ServerCameraClient(IOClient):
-#     def __init__(self, udp_host: str,
-#                  udp_port: int,
-#                  tcp_host: str,
-#                  tcp_port: int):
-
-#         self._server = beholder2048squad.Server.Server(
-#             udp_host, udp_port, tcp_host, tcp_port)
-
-#     def read_frame(self) :
-#         super().read_frame()
-#         return cv2.resize(self._server.recv_img(), cfg.IMG_SHAPE)
-
-#     def send_msg(self, command: str) -> None:
-#         super().send_msg(command)
-#         self._server.send_msg(command)
-
-
 class EyeCarClient(IOClient):
     def __init__(self):
         self.arduino = Arduino(cfg.ARDUINO_PORT, baudrate=115200, timeout=10)
@@ -177,7 +159,9 @@ class EyeCarClient(IOClient):
         super().send_msg(command)
 
         if command == "PARK":
-            self._park()
+            self._park_car()
+            if cfg.DROP_CARGO:
+                self._drop_cargo()
             raise StopIteration("Endpoint reached")
 
         for cmd in command.split('\n'):
@@ -198,7 +182,7 @@ class EyeCarClient(IOClient):
                 angle = int(args)
                 self.arduino.set_angle(90 - angle)
 
-    def _park(self):
+    def _park_car(self):
         self.arduino.set_speed(cfg.CAR_MIN_SPEED)
         self.arduino.set_angle(90 + 10)
         time.sleep(2)
@@ -208,6 +192,9 @@ class EyeCarClient(IOClient):
         self.arduino.set_angle(90)
         self.arduino.stop()
 
+    def _drop_cargo(self):
+        self.arduino.drop()
+
             
 
 def create_io_client(in_mode, args) -> IOClient:
@@ -215,9 +202,6 @@ def create_io_client(in_mode, args) -> IOClient:
         return LocalCameraClient()
     elif in_mode == InputType.IMAGE_FOLDER:
         return ImageFolderClient(path=args.img_source_folder_path)
-    elif in_mode == InputType.SERVER_CAMERA:
-        return ServerCameraClient(udp_host=cfg.UDP_HOST, udp_port=cfg.UDP_PORT,
-                                  tcp_host=cfg.TCP_HOST, tcp_port=cfg.TCP_PORT)
     elif in_mode == InputType.VIDEO_PLAYER:
         return VideoPlayerClient(path=os.path.join(args.video_source_path, args.video_source_file), fps=cfg.FPS)
     elif in_mode == InputType.EYECAR:

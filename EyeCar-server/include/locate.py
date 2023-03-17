@@ -29,9 +29,9 @@ class KeyPoints:
 
 class Locate:
     pos_route_entry = {
-        1: [Directions.RIGHT, Directions.STRAIGHT, Directions.RIGHT],
-        2: [Directions.RIGHT, Directions.RIGHT, Directions.RIGHT],
-        3: [Directions.STRAIGHT, Directions.RIGHT, Directions.RIGHT]
+        1: [Directions.RIGHT, Directions.STRAIGHT, Directions.RIGHT, Directions.HUB],
+        2: [Directions.RIGHT, Directions.RIGHT, Directions.RIGHT, Directions.HUB],
+        3: [Directions.STRAIGHT, Directions.RIGHT, Directions.RIGHT, Directions.HUB]
     }
 
     def __init__(self, io_client: IOClient):

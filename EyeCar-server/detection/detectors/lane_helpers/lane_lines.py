@@ -22,7 +22,9 @@ class LaneLines:
         img_h, img_w = layout.shape
         x1, y1 = p1
         x2, y2 = p2
-        layout[y1:y2, x1:x2] = 0
+
+        if cfg.ERASE_STOPLINE:
+            layout[y1:y2, x1:x2] = 0
         
         lines = self.get_lines(layout, out_img)
 
