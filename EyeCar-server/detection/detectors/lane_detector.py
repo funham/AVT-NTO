@@ -31,7 +31,7 @@ class RoadDetector(IDetector):
             cfg.IMG_SHAPE, (320, 400), *cfg.PERSPECTIVE_TRANSFORM_PARAMS)
 
     def forward(self, frame: cv2.Mat) -> dict:
-        flat_view = self.perspective_transformer(frame)
+        flat_view = self.perspective_transformer(frame.copy())
         layout = self.thresholder(flat_view)
 
         out_img = np.dstack((layout, layout, layout))
